@@ -143,22 +143,28 @@ Luego de ello, el valor medio de la columna Bytes es **`r round(mean(df$Bytes, n
 
 **De las diferentes IPs de origen accediendo al servidor, ¿cuantas pertenecen a una IP claramente educativa (que contenga ".edu")?**
 
-```{r edu}
+Para poder dar respuesta a esta pregunta, es esencial estructurar lo que vamos a realizar. Para ello, se van a realizar 3 comandos que serán explicados a continuación:
+
+-   **Comando 1:** `grep(".edu", df$IP)`. Este comando busca la cadena de texto ".edu" dentro de la columna "IP" en el dataset.
+
+```{r edu1}
 # Buscamos las filas donde la columna IP (V1) contiene ".edu"
 ips_educativas <- grep(".edu", df$IP, value = TRUE)
+```
 
+-   **Comando 2:** `length(...)`. Cuenta cuántos elementos se encontraron en la búsqueda anterior.
+
+```{r edu2}
 # Contamos cuántas hay en total
 total_educativas <- length(ips_educativas)
+```
 
+-   **Comando 3:** `unique(...)`. Se usa por si una misma universidad hizo muchas peticiones; esto permite saber cuántas "entidades" educativas diferentes hay.
+
+```{r edu3}
 # Si quieres saber cuántas IPs ÚNICAS educativas hay
 ips_unicas_edu <- length(unique(ips_educativas))
 ```
-
-Explicación de los comandos: grep(".edu", df\$IP): Busca la cadena de texto ".edu" dentro de la primera columna de tu tabla.
-
-length(...): Cuenta cuántos elementos se encontraron en la búsqueda anterior.
-
-unique(...): Se usa por si una misma universidad hizo muchas peticiones; esto te permite saber cuántas "entidades" educativas diferentes hay, aunque la pregunta suele referirse al total de registros.
 
 Al analizar el dataset, se identificó que existen **`r total_educativas`** peticiones provenientes de dominios educativos (que contienen ".edu"). Si filtramos por direcciones únicas, encontramos que hay **`r ips_unicas_edu`** instituciones educativas distintas accediendo al servidor.
 
