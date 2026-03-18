@@ -213,6 +213,19 @@ total_peticiones_get <- conteo_horas$n[1]
 
 Tras procesar la columna de tiempo y filtrar las peticiones de tipo "GET", se determinó que la hora con mayor actividad es la hora **`r hora_punta`**, registrando un total de **`r total_peticiones_get`** peticiones de este tipo.
 
+Adicionalmente, se presenta la tabla de frecuencias obtenida:
+
+```{r tabla-frecuencias, echo=FALSE, toc=T}
+library(knitr)
+library(dplyr)
+
+# Generamos la tabla estética
+kable(conteo_horas, 
+      caption = "Tabla de Frecuencias de peticiones GET del tipo HTTP por hora",
+      col.names = c("Hora del día","Cantidad de peticiones"),
+      align = "lcc") # l=left, c=center, c=center
+```
+
 ### Pregunta 4
 
 **De las peticiones hechas por instituciones educativas (.edu), ¿Cuántos bytes en total se han transmitido, en peticiones de descarga de ficheros de texto ".txt"?**
@@ -269,8 +282,7 @@ De las peticiones recibidas, un total de **`r peticiones_raiz`** buscan directam
 
 En esta sección se evaluó la diversidad de protocolos de comunicación utilizados por los clientes que acceden al servidor. El objetivo es identificar peticiones que utilicen versiones no estándar o legacy que puedan representar un riesgo o una anomalía.
 
-Cálculo Técnico
-Para este análisis, se procesaron las peticiones separando sus componentes y filtrando aquellas que no corresponden al estándar específico solicitado:
+Cálculo Técnico Para este análisis, se procesaron las peticiones separando sus componentes y filtrando aquellas que no corresponden al estándar específico solicitado:
 
 ```{r pregunta6}
 # Filtrado de protocolos distintos a HTTP/0.2
@@ -289,8 +301,6 @@ Peticiones No-Estándar (Fuera de HTTP/0.2): r peticiones_no_http02
 Índice de Diversidad de Protocolo: r round(porcentaje_no_std, 2)% del tráfico total.
 
 La gran mayoría del tráfico opera bajo protocolos distintos a HTTP/0.2 (principalmente HTTP/1.0). Esto indica que la infraestructura soporta una amplia gama de clientes, pero sugiere la necesidad de monitorear versiones de protocolos obsoletos para asegurar la compatibilidad y seguridad del servicio.
-
-
 
 ```{r tabla-protocolos, echo=FALSE}
 library(knitr)
@@ -313,4 +323,3 @@ kable(resumen_tabla,
       col.names = c("Versión del Protocolo", "Número de Peticiones", "Cuota de Tráfico"),
       align = "lcc") # l=left, c=center, c=center
 ```
-

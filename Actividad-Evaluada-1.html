@@ -360,7 +360,9 @@ Ciberamenazas</h1>
 
 <pre class="r"><code>library(readr)
 library(tidyverse)
-library(stringr)</code></pre>
+library(stringr)
+library(knitr)
+library(dplyr)</code></pre>
 <div id="data-science" class="section level1">
 <h1>1. Data Science</h1>
 <div id="pregunta-1-de-las-siguientes-preguntas-clasifica-cada-una-como-descriptiva-exploratoria-inferencia-predictiva-o-causal-y-razona-brevemente-una-frase-el-porqué" class="section level3">
@@ -638,34 +640,147 @@ accediendo al servidor.</p>
 <p><strong>De todas las peticiones recibidas por el servidor ¿Cuál es la
 hora en la que hay mayor volumen de peticiones HTTP de tipo
 “GET”?</strong></p>
-<pre class="r"><code>library(tidyverse)
-
-# 1. Extraemos la hora. El formato es [DD:HH:MM:SS]
+<p>Para responder la pregunta, es requerido primero revisar el formato
+utilizado. La columna “Time” tiene el formato [DD:HH:MM:SS], donde los
+elementos son:</p>
+<ul>
+<li><p>DD: Día del mes cuando ocurre el evento.</p></li>
+<li><p>HH: Hora del día cuando ocurre el evento.</p></li>
+<li><p>MM: Minuto de la hora cuando ocurre el evento.</p></li>
+<li><p>SS: Segundo del minuto cuando ocurre el evento.</p></li>
+</ul>
+<p>En ese sentido, requerimos primero extraer el segundo elemento de la
+columna “Time”, y filtramos para obtener sólo los request del tipo
+GET.:</p>
+<pre class="r"><code># Extraemos la hora. El formato es [DD:HH:MM:SS]
 # Al separar por &quot;:&quot;, la hora es el segundo elemento.
 df_get &lt;- df %&gt;%
   mutate(Hora = str_split_fixed(Time, &quot;:&quot;, 4)[, 2]) %&gt;%
-  filter(str_detect(Request, &quot;GET&quot;)) # Filtramos solo las peticiones GET
-
-# 2. Contamos las peticiones por hora
+  filter(str_detect(Request, &quot;GET&quot;)) # Filtramos solo las peticiones GET</code></pre>
+<p>A continuación, contamos las peticiones por hora y creamos una tabla
+de frecuencias, que nos dice cuántas filas hay por cada hora del
+día.</p>
+<pre class="r"><code># Contamos las peticiones por hora
 conteo_horas &lt;- df_get %&gt;%
   group_by(Hora) %&gt;%
-  tally(sort = TRUE)
-
-# 3. Obtenemos la hora con el valor máximo
+  tally(sort = TRUE)</code></pre>
+<p>Finalmente, obtenemos los valores que se requieren mediante:</p>
+<pre class="r"><code># Obtenemos la hora con el valor máximo
 hora_punta &lt;- conteo_horas$Hora[1]
 total_peticiones_get &lt;- conteo_horas$n[1]</code></pre>
-<p>Explicación del procedimiento: Extracción de la hora: Como el campo
-Time viene como [29:23:53:25], usamos el separador : para dividir la
-cadena. La hora siempre ocupa la segunda posición.</p>
-<p>Filtrado GET: Es fundamental usar filter con str_detect o grep sobre
-la columna de la petición para no contar otros métodos como POST o
-HEAD.</p>
-<p>Agrupación: group_by(Hora) %&gt;% tally() crea una tabla de
-frecuencias que nos dice cuántas filas hay por cada hora del día.</p>
 <p>Tras procesar la columna de tiempo y filtrar las peticiones de tipo
 “GET”, se determinó que la hora con mayor actividad es la hora
 <strong>14</strong>, registrando un total de <strong>4546</strong>
 peticiones de este tipo.</p>
+<p>Adicionalmente, se presenta la tabla de frecuencias obtenida:</p>
+<table>
+<caption>Tabla de Frecuencias de peticiones GET del tipo HTTP por
+hora</caption>
+<thead>
+<tr class="header">
+<th align="left">Hora del día</th>
+<th align="center">Cantidad de peticiones</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">14</td>
+<td align="center">4546</td>
+</tr>
+<tr class="even">
+<td align="left">13</td>
+<td align="center">4202</td>
+</tr>
+<tr class="odd">
+<td align="left">15</td>
+<td align="center">4122</td>
+</tr>
+<tr class="even">
+<td align="left">16</td>
+<td align="center">3950</td>
+</tr>
+<tr class="odd">
+<td align="left">12</td>
+<td align="center">3707</td>
+</tr>
+<tr class="even">
+<td align="left">11</td>
+<td align="center">3689</td>
+</tr>
+<tr class="odd">
+<td align="left">10</td>
+<td align="center">3140</td>
+</tr>
+<tr class="even">
+<td align="left">09</td>
+<td align="center">3008</td>
+</tr>
+<tr class="odd">
+<td align="left">17</td>
+<td align="center">2694</td>
+</tr>
+<tr class="even">
+<td align="left">08</td>
+<td align="center">1911</td>
+</tr>
+<tr class="odd">
+<td align="left">18</td>
+<td align="center">1770</td>
+</tr>
+<tr class="even">
+<td align="left">19</td>
+<td align="center">1435</td>
+</tr>
+<tr class="odd">
+<td align="left">20</td>
+<td align="center">1215</td>
+</tr>
+<tr class="even">
+<td align="left">23</td>
+<td align="center">1120</td>
+</tr>
+<tr class="odd">
+<td align="left">22</td>
+<td align="center">1065</td>
+</tr>
+<tr class="even">
+<td align="left">21</td>
+<td align="center">984</td>
+</tr>
+<tr class="odd">
+<td align="left">07</td>
+<td align="center">814</td>
+</tr>
+<tr class="even">
+<td align="left">00</td>
+<td align="center">659</td>
+</tr>
+<tr class="odd">
+<td align="left">01</td>
+<td align="center">424</td>
+</tr>
+<tr class="even">
+<td align="left">02</td>
+<td align="center">386</td>
+</tr>
+<tr class="odd">
+<td align="left">05</td>
+<td align="center">355</td>
+</tr>
+<tr class="even">
+<td align="left">04</td>
+<td align="center">327</td>
+</tr>
+<tr class="odd">
+<td align="left">06</td>
+<td align="center">296</td>
+</tr>
+<tr class="even">
+<td align="left">03</td>
+<td align="center">201</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="pregunta-4" class="section level3">
 <h3>Pregunta 4</h3>
