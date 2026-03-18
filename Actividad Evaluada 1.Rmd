@@ -13,9 +13,9 @@ output:
 
 ### Pregunta 1: Clasificación de preguntas
 
-**1. Ajuste de precios de peajes (conteo y tipo más frecuente, países con más vehículos)** \* **Clasificación:** Descriptiva. \* **Razonamiento:** Se busca resumir y organizar datos históricos existentes (conteos, frecuencias y máximos) para entender el estado actual o pasado sin realizar inferencias.
+**1. Ajuste de precios de peajes (conteo y tipo más frecuente, países con más vehículos)** \* **Clasificación:** Descriptiva. \* **Razonamiento:** Es descriptiva porque se mi limita a resumir y cuantificar la información disponible del registro, como cantidades, frecuencias y categorìas màs comunes.
 
-**2. Preferencias de género literario según usuarios y rango de edad** \* **Clasificación:** Exploratoria. \* **Razonamiento:** El objetivo es hallar relaciones, tendencias o patrones ocultos entre variables (edad, género y preferencias) para formular hipótesis sobre el comportamiento del lector.
+**2. Preferencias de género literario según usuarios y rango de edad** \* **Clasificación:** Exploratoria. \* **Razonamiento:** Es Exploratoria porque busca identificar posibles relaciones o patrones entre variables, como la edad de los usuario y sus preferencias de visualización.
 
 **3. Determinación de problemas futuros con una red de telefonía y comparación con otras** \* **Clasificación:** Predictiva. \* **Razonamiento:** Utiliza datos históricos y comparativos para modelar comportamientos y anticipar eventos (fallos de red) que aún no han ocurrido.
 
