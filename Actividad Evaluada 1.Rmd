@@ -1,24 +1,20 @@
 ---
-title: "Actividad Evaluada"
-author: "Grupo CJLR"
-date: "2026-03-16"
-output: html_document
+title: "Actividad Evaluable 1: Seminario Internacional en Herramientas y Técnicas de Detección de Ciberamenazas"
+autor"Grupo CJLR"
+fecha: "18 de marzo de 2026"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+# Configuración global de los chunks
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
-# Pregunta 1
-
-En está sección se clasificarán los tipos de preguntas:
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+# Carga de librerías recomendadas
+library(readr)
+library(stringr)
+library(dplyr)
+# Añade otras librerías si lo necesitas
