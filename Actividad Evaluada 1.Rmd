@@ -12,6 +12,8 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
 ```{r librerias}
 library(readr)
+library(tidyverse)
+library(stringr)
 ```
 
 # 1. Data Science
@@ -47,6 +49,12 @@ library(readr)
 -   Razonamiento: Es inferencial causal porque, a partir de datos históricos, se identifican patrones de comportamiento y se utiliza esa información para asignar a un nuevo usuario a un grupo determinado según sus características similares.
 
 ### Pregunta 2: Escenario de Ciberseguridad
+
+Considera el siguiente escenario:
+
+Sabemos que un usuario de nuestra red empresarial ha estado usando esta para fines no relacionados con el trabajo, como por ejemplo tener un servicio web no autorizado abierto a la red (otros usuarios tienen servicios web activados y autorizados). No queremos tener que rastrear los puertos de cada PC, y sabemos que la actividad puede haber cesado. Pero podemos acceder a los registros de conexiones TCP de cada máquina de cada trabajador (hacia donde abre conexión un PC concreto). Sabemos que nuestros clientes se conectan desde lugares remotos de forma legítima, como parte de nuestro negocio, y que un trabajador puede haber habilitado temporalmente servicios de prueba. Nuestro objetivo es reducir lo posible la lista de posibles culpables, con tal de explicarles que por favor no expongan nuestros sistemas sin permiso de los operadores o la dirección.
+
+Explica con detalle cómo se podría proceder al análisis y resolución del problema mediante Data Science, indicando de donde se obtendrían los datos, qué tratamiento deberían recibir, qué preguntas hacerse para resolver el problema, qué datos y gráficos se obtendrían, y cómo se comunicarían estos.
 
 **Etapa: ASK**
 
@@ -93,10 +101,33 @@ En esta etapa se presentan los resultados del análisis de forma clara, comprens
 
 En cuanto a los datos y visualizaciones, se emplean diferentes tipos de gráficos para facilitar la interpretación de los resultados. Los histogramas de frecuencia permiten detectar picos de tráfico, especialmente en horarios no laborables. Los gráficos de dispersión (scatter plots) ayudan a identificar valores atípicos en variables como el volumen de datos transferidos por sesión. Los mapas de calor (heatmaps) resultan útiles para visualizar la intensidad de conexiones entre direcciones IP de origen y destino. Finalmente, se incluyen métricas relevantes como la tasa de error de conexión, la latencia media y el ratio de paquetes perdidos, que aportan contexto adicional sobre el comportamiento de la red y ayudan a reforzar las conclusiones del análisis.
 
+# 2. Introducción a R
+
 ## Import Dataset
 
-library(readr) df \<- read_table("./epa-http.csv", col_names = c("Origin","Timestamp","Method","URI","Protocol","Status","Bytes"))
+## Creaciòn de DB con cabeceras
 
-library(stringr) df$tiempo_raw <- str_extract(df$Timestamp, "\\[.\*?\\]") df$tiempo_raw <- str_remove_all(df$tiempo_raw, "\\[\|\\]")
+```{r importDF}
+# Leer el CSV 
+df <- read.table("epa-http.csv", header = FALSE, sep = " ", fill = TRUE, stringsAsFactors = FALSE)
+
+# Asignar nombres temporales para trabajar mejor
+colnames(df) <- c("IP", "Time", "Request", "ResponseCode", "Bytes")
+```
+
+### Pregunta 1
+
+1. Cuales son las dimensiones del dataset cargado (número de filas y columnas) 
+
+Para el calculo de la dimensiones se utiliza ejecuta la siguiente linea de codigo:
+Las dimensiones de la tabla son `r ncol(df)` columnas y `r nrow(df)` filas. El valor medio de la columna Bytes es `r round(mean(df$Bytes, na.rm = TRUE), 2)`.
+
+```{r dimensiones}
+dim(df)
+```
+
+2. Valor medio de la columna Bytes
+
+library(stringr) df$tiempo_raw <- str_extract(df$Time, "\\[.\*?\\]") df$tiempo_raw <- str_remove_all(df$tiempo_raw, "\\[\|\\]")
 
 library(tidyr) df \<- df %\>% separate(tiempo_raw, into = c("dia", "hora", "minuto", "segundo"), sep = ":")
