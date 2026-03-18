@@ -105,32 +105,40 @@ En cuanto a los datos y visualizaciones, se emplean diferentes tipos de gráfico
 
 ## Import Dataset
 
-## Creaciòn de DB con cabeceras
+## Creación de DB con cabeceras
 
-```{r limpieza, echo=FALSE, message=FALSE, warning=FALSE}
+Para poder realizar una línea base desde la cual comenzar con la actividad, se genera el import mediante la función `read.table()` . Así mismo, se cambian los nombres de las columnas para poder identificarlas mejor.
+
+```{r carga, echo=TRUE, message=FALSE, warning=FALSE}
 # Carga y limpieza inicial
 df <- read.table("epa-http.csv", header = FALSE, sep = " ", fill = TRUE, stringsAsFactors = FALSE)
 colnames(df) <- c("IP", "Time", "Request", "ResponseCode", "Bytes")
-
-# Convertir "-" a NA y la columna a numérica para que el cálculo funcione
-df$Bytes <- as.numeric(ifelse(df$Bytes == "-", NA, df$Bytes))
-df$Bytes[is.na(df$Bytes)] <- 0
 ```
 
 ### Pregunta 1
 
 **¿Cuáles son las dimensiones del dataset cargado (número de filas y columnas)?**
-**Valor medio de la columna Bytes**
 
-Para el cálculo de las dimensiones se ejecuta la siguiente línea de código:
+Dado el dataset cargado incialmente, para el cálculo de las dimensiones se ejecuta la siguiente línea de código:
 
 ```{r dimensiones}
 dim(df)
 ```
 
-Las dimensiones de la tabla son **`r ncol(df)`** columnas y **`r nrow(df)`** filas. El valor medio de la columna Bytes es **`r round(mean(df$Bytes, na.rm = TRUE), 2)`**.
+En ese sentido, las dimensiones de la tabla son **`r ncol(df)`** columnas y **`r nrow(df)`** filas.
+
+**Valor medio de la columna Bytes**
+
+Para lograr obtener el valor medio de la columna Bytes, es necesario primero convertir algunos valores que son capaces de modificar el valor medio. Estos casos son los de valores "-" y "NA", los cuales deben ser convertidos a "0" para ser contabilizados. Esto se logra mediante el siguiente código:
+
+```{r limpieza, echo=TRUE, message=FALSE, warning=FALSE}
+# Convertir "-" a NA y la columna a numérica para que el cálculo funcione
+df$Bytes <- as.numeric(ifelse(df$Bytes == "-", NA, df$Bytes))
+df$Bytes[is.na(df$Bytes)] <- 0
+```
+
+Luego de ello, el valor medio de la columna Bytes es **`r round(mean(df$Bytes, na.rm = TRUE), 2)`**.
 
 ### Pregunta 2
 
 **¿Cuáles son las dimensiones del dataset cargado (número de filas y columnas)?**
-

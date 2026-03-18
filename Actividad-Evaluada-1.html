@@ -363,39 +363,86 @@ library(tidyverse)
 library(stringr)</code></pre>
 <div id="data-science" class="section level1">
 <h1>1. Data Science</h1>
-<div id="pregunta-1-clasificación-de-preguntas" class="section level3">
-<h3>Pregunta 1: Clasificación de preguntas</h3>
-<p><strong>1. Ajuste de precios de peajes (conteo y tipo más frecuente,
-países con más vehículos)</strong></p>
-<p><strong>Clasificación:</strong> Descriptiva.
-<strong>Razonamiento:</strong> Es descriptiva porque se mi limita a
-resumir y cuantificar la información disponible del registro, como
-cantidades, frecuencias y categorìas màs comunes.</p>
-<p><strong>2. Preferencias de género literario según usuarios y rango de
-edad</strong></p>
-<p><strong>Clasificación:</strong> Exploratoria.</p>
-<p><strong>Razonamiento:</strong> Es Exploratoria porque busca
-identificar posibles relaciones o patrones entre variables, como la edad
-de los usuario y sus preferencias de visualización.</p>
-<p><strong>3. Determinación de problemas futuros con una red de
-telefonía y comparación con otras</strong>
-<strong>Clasificación:</strong> Predictiva.</p>
-<p><strong>Razonamiento:</strong> Es predictiva porque busca anticipar
-comportamientos futuros a partir de datos historicos. Por ejemplo, si se
-observa que el 75% de las peticiones provenientes de una red “X” generan
-errores, mientras que en otras redes la tasa es menor al 10%, se puede
-inferir que las futuras solicitudes de la red “x” tienen alta probalidad
-de fallar, mientras que en las demás el riesgo es bajo.</p>
-<p><strong>4. Asignación de un usuario al azar a grupos según su
-historial</strong></p>
-<p><strong>Clasificación:</strong> Inferencial / Causal.</p>
-<p><strong>Razonamiento:</strong> Es inferencial causal porque, a partir
-de datos históricos, se identifican patrones de comportamiento y se
-utiliza esa información para asignar a un nuevo usuario a un grupo
-determinado según sus características similares.</p>
+<div id="pregunta-1-de-las-siguientes-preguntas-clasifica-cada-una-como-descriptiva-exploratoria-inferencia-predictiva-o-causal-y-razona-brevemente-una-frase-el-porqué" class="section level3">
+<h3>Pregunta 1: De las siguientes preguntas, clasifica cada una como
+descriptiva, exploratoria, inferencia, predictiva o causal, y razona
+brevemente (una frase) el porqué:</h3>
+<p><strong>1. Enunciado:</strong> Dado un registro de vehículos que
+circulan por una autopista, disponemos de su marca y modelo, país de
+matriculación, y tipo de vehículo (por número de ruedas). Con tal de
+ajustar precios de los peajes, ¿Cuántos vehículos tenemos por tipo?
+¿Cuál es el tipo más frecuente? ¿De qué países tenemos más
+vehículos?</p>
+<p><strong>Respuesta:</strong></p>
+<ul>
+<li>Clasificación: Descriptiva.</li>
+<li>Razonamiento: Es descriptiva porque se mi limita a resumir y
+cuantificar la información disponible del registro, como cantidades,
+frecuencias y categorìas màs comunes.</li>
+</ul>
+<p><strong>2. Enunciado:</strong> Dado un registro de visualizaciones de
+un servicio de video-on-demand, donde disponemos de los datos del
+usuario, de la película seleccionada, fecha de visualización y categoría
+de la película, queremos saber ¿Hay alguna preferencia en cuanto a
+género literario según los usuarios y su rango de edad?</p>
+<p><strong>Respuesta:</strong></p>
+<ul>
+<li>Clasificación: Exploratoria.</li>
+<li>Razonamiento: Es Exploratoria porque busca identificar posibles
+relaciones o patrones entre variables, como la edad de los usuario y sus
+preferencias de visualización.</li>
+</ul>
+<p><strong>3. Enunciado:</strong> Dado un registro de peticiones a un
+sitio web, vemos que las peticiones que provienen de una red de
+telefonía concreta acostumbran a ser incorrectas y provocarnos errores
+de servicio. ¿Podemos determinar si en el futuro, los próximos mensajes
+de esa red seguirán dando problemas? ¿Hemos notado el mismo efecto en
+otras redes de telefonía?</p>
+<p><strong>Respuesta:</strong></p>
+<ul>
+<li>Clasificación: Predictiva.</li>
+<li>Razonamiento: Es predictiva porque busca anticipar comportamientos
+futuros a partir de datos historicos. Por ejemplo, si se observa que el
+75% de las peticiones provenientes de una red “X” generan errores,
+mientras que en otras redes la tasa es menor al 10%, se puede inferir
+que las futuras solicitudes de la red “x” tienen alta probalidad de
+fallar, mientras que en las demás el riesgo es bajo.</li>
+</ul>
+<p><strong>4. Enunciado:</strong> Dado los registros de usuarios de un
+servicio de compras por internet, los usuarios pueden agruparse por
+preferencias de productos comprados. Queremos saber si ¿Es posible que,
+dado un usuario al azar y según su historial, pueda ser directamente
+asignado a un o diversos grupos?</p>
+<p><strong>Respuesta:</strong></p>
+<ul>
+<li>Clasificación: Inferencial Causal.</li>
+<li>Razonamiento: Es inferencial causal porque, a partir de datos
+históricos, se identifican patrones de comportamiento y se utiliza esa
+información para asignar a un nuevo usuario a un grupo determinado según
+sus características similares.</li>
+</ul>
 </div>
 <div id="pregunta-2-escenario-de-ciberseguridad" class="section level3">
 <h3>Pregunta 2: Escenario de Ciberseguridad</h3>
+<p>Considera el siguiente escenario:</p>
+<p>Sabemos que un usuario de nuestra red empresarial ha estado usando
+esta para fines no relacionados con el trabajo, como por ejemplo tener
+un servicio web no autorizado abierto a la red (otros usuarios tienen
+servicios web activados y autorizados). No queremos tener que rastrear
+los puertos de cada PC, y sabemos que la actividad puede haber cesado.
+Pero podemos acceder a los registros de conexiones TCP de cada máquina
+de cada trabajador (hacia donde abre conexión un PC concreto). Sabemos
+que nuestros clientes se conectan desde lugares remotos de forma
+legítima, como parte de nuestro negocio, y que un trabajador puede haber
+habilitado temporalmente servicios de prueba. Nuestro objetivo es
+reducir lo posible la lista de posibles culpables, con tal de
+explicarles que por favor no expongan nuestros sistemas sin permiso de
+los operadores o la dirección.</p>
+<p>Explica con detalle cómo se podría proceder al análisis y resolución
+del problema mediante Data Science, indicando de donde se obtendrían los
+datos, qué tratamiento deberían recibir, qué preguntas hacerse para
+resolver el problema, qué datos y gráficos se obtendrían, y cómo se
+comunicarían estos.</p>
 <p><strong>Etapa: ASK</strong></p>
 <p>En esta etapa, se requiere primero comenzar con la propuesta de
 preguntas que ayuden a encaminar la investigación. Para ello, se
@@ -521,19 +568,35 @@ análisis.</p>
 <div id="import-dataset" class="section level2">
 <h2>Import Dataset</h2>
 </div>
-<div id="creaciòn-de-db-con-cabeceras" class="section level2">
-<h2>Creaciòn de DB con cabeceras</h2>
+<div id="creación-de-db-con-cabeceras" class="section level2">
+<h2>Creación de DB con cabeceras</h2>
+<p>Para poder realizar una línea base desde la cual comenzar con la
+actividad, se genera el import mediante la función
+<code>read.table()</code> . Así mismo, se cambian los nombres de las
+columnas para poder identificarlas mejor.</p>
+<pre class="r"><code># Carga y limpieza inicial
+df &lt;- read.table(&quot;epa-http.csv&quot;, header = FALSE, sep = &quot; &quot;, fill = TRUE, stringsAsFactors = FALSE)
+colnames(df) &lt;- c(&quot;IP&quot;, &quot;Time&quot;, &quot;Request&quot;, &quot;ResponseCode&quot;, &quot;Bytes&quot;)</code></pre>
 <div id="pregunta-1" class="section level3">
 <h3>Pregunta 1</h3>
 <p><strong>¿Cuáles son las dimensiones del dataset cargado (número de
-filas y columnas)?</strong> <strong>Valor medio de la columna
-Bytes</strong></p>
-<p>Para el cálculo de las dimensiones se ejecuta la siguiente línea de
-código:</p>
+filas y columnas)?</strong></p>
+<p>Dado el dataset cargado incialmente, para el cálculo de las
+dimensiones se ejecuta la siguiente línea de código:</p>
 <pre class="r"><code>dim(df)</code></pre>
 <pre><code>## [1] 47748     5</code></pre>
-<p>Las dimensiones de la tabla son <strong>5</strong> columnas y
-<strong>47748</strong> filas. El valor medio de la columna Bytes es
+<p>En ese sentido, las dimensiones de la tabla son <strong>5</strong>
+columnas y <strong>47748</strong> filas.</p>
+<p><strong>Valor medio de la columna Bytes</strong></p>
+<p>Para lograr obtener el valor medio de la columna Bytes, es necesario
+primero convertir algunos valores que son capaces de modificar el valor
+medio. Estos casos son los de valores “-” y “NA”, los cuales deben ser
+convertidos a “0” para ser contabilizados. Esto se logra mediante el
+siguiente código:</p>
+<pre class="r"><code># Convertir &quot;-&quot; a NA y la columna a numérica para que el cálculo funcione
+df$Bytes &lt;- as.numeric(ifelse(df$Bytes == &quot;-&quot;, NA, df$Bytes))
+df$Bytes[is.na(df$Bytes)] &lt;- 0</code></pre>
+<p>Luego de ello, el valor medio de la columna Bytes es
 <strong>6531.46</strong>.</p>
 </div>
 <div id="pregunta-2" class="section level3">
