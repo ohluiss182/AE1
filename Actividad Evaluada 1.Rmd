@@ -16,6 +16,7 @@ library(tidyverse)
 library(stringr)
 library(knitr)
 library(dplyr)
+library(DT)
 ```
 
 # 1. Data Science
@@ -116,6 +117,7 @@ Para poder realizar una línea base desde la cual comenzar con la actividad, se 
 df <- read.table("epa-http.csv", header = FALSE, sep = " ", fill = TRUE, stringsAsFactors = FALSE)
 colnames(df) <- c("IP", "Time", "Request", "ResponseCode", "Bytes")
 ```
+
 
 ### Pregunta 1
 
@@ -352,4 +354,18 @@ df_2$Tipo <- as.factor(df_2$Tipo)
 
 # Cambio de columna Time
 df_2$Time <- strptime(df_2$Time,"[%d:%H:%M:%S]")
+```
+
+## Anexo: Summary
+
+```{r anexo1, echo=TRUE, message=FALSE, warning=FALSE}
+# Carga y limpieza inicial
+summary(df_2)
+```
+
+## Anexo: Fase de Exploración
+
+```{r anexo2, echo=TRUE, message=FALSE, warning=FALSE}
+# Carga y limpieza inicial
+datatable(df_2)
 ```
