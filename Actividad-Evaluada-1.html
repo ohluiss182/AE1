@@ -864,10 +864,10 @@ peticiones_no_http02 &lt;- df_split %&gt;%
 porcentaje_no_std &lt;- (peticiones_no_http02 / nrow(df_split)) * 100</code></pre>
 <p>Tras analizar el tráfico total del servidor, se determinó lo
 siguiente:</p>
-<p>Peticiones No-Estándar (Fuera de HTTP/0.2): r
-peticiones_no_http02</p>
-<p>Índice de Diversidad de Protocolo: r round(porcentaje_no_std, 2)% del
-tráfico total.</p>
+<p>Peticiones No-Estándar (Fuera de HTTP/0.2):
+<strong>47747</strong></p>
+<p>Índice de Diversidad de Protocolo: <strong>100</strong>% del tráfico
+total.</p>
 <p>La gran mayoría del tráfico opera bajo protocolos distintos a
 HTTP/0.2 (principalmente HTTP/1.0). Esto indica que la infraestructura
 soporta una amplia gama de clientes, pero sugiere la necesidad de
