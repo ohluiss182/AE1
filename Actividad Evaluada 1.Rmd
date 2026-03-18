@@ -228,8 +228,39 @@ Tras filtrar el dataset para incluir únicamente las peticiones provenientes de 
 
 ### Pregunta 5
 
-**De Si separamos la petición en 3 partes (Tipo, Url, Protocolo), usando str_split y el separador " " (espacio), ¿Cúantas peticiones buscan directamente la URL = "/"?**
+**Si separamos la petición en 3 partes (Tipo, Url, Protocolo), usando str_split y el separador " " (espacio), ¿Cúantas peticiones buscan directamente la URL = "/"?**
+
+```{r pregunta5}
+library(tidyverse)
+
+# 1. Limpiamos las comillas y separamos la columna 'Request' en tres: Tipo, URL y Protocolo
+df_split <- df %>%
+  mutate(Request = str_replace_all(Request, '"', "")) %>%
+  separate(Request, into = c("Tipo", "URL", "Protocolo"), sep = " ", extra = "merge", fill = "right")
+
+# 2. Contamos cuántas peticiones buscan exactamente la URL = "/"
+peticiones_raiz <- df_split %>%
+  filter(URL == "/") %>%
+  nrow()
+```
+
+separate(...): Esta es la forma más limpia de cumplir con lo que pide el enunciado. Crea tres columnas reales en tu data frame, lo que facilita enormemente el filtrado.
+
+URL == "/": Al usar el operador de igualdad estricta ==, nos aseguramos de contar solo las que buscan la raíz, excluyendo otras como /Software.html o /icons/.
+
+Limpieza de comillas: Si no quitas las comillas antes de separar, la columna "Tipo" se guardaría como "GET (con la comilla inicial), lo cual podría ensuciar tus datos.
+
+De las peticiones recibidas, un total de **`r peticiones_raiz`** buscan directamente la URL raíz (`/`).
 
 ### Pregunta 6
 
 **Aprovechando que hemos separado la petición en 3 partes (Tipo, URL, Protocolo) ¿Cuantas peticiones NO tienen como protocolo "HTTP/0.2"?**
+
+```{r pregunta6}
+# Filtramos las peticiones donde el protocolo NO sea "HTTP/0.2"
+peticiones_no_http02 <- df_split %>%
+  filter(Protocolo != "HTTP/0.2") %>%
+  nrow()
+```
+
+Tras analizar la columna de protocolos, se determinó que hay **`r peticiones_no_http02`** peticiones que tienen un protocolo distinto a "HTTP/0.2".
