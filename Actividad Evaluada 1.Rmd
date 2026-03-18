@@ -18,15 +18,26 @@ library(readr)
 
 ### Pregunta 1: Clasificación de preguntas
 
-**1. Ajuste de precios de peajes (conteo y tipo más frecuente, países con más vehículos)** \* **Clasificación:** Descriptiva. \* **Razonamiento:** Es descriptiva porque se mi limita a resumir y cuantificar la información disponible del registro, como cantidades, frecuencias y categorìas màs comunes.
+**1. Ajuste de precios de peajes (conteo y tipo más frecuente, países con más vehículos)**
 
-**2. Preferencias de género literario según usuarios y rango de edad** \* **Clasificación:** Exploratoria. \* **Razonamiento:** Es Exploratoria porque busca identificar posibles relaciones o patrones entre variables, como la edad de los usuario y sus preferencias de visualización. \>\>\>\>\>\>\> 42ae8831253620bb209625991c40b8ec9081d048
+**Clasificación:** Descriptiva. **Razonamiento:** Es descriptiva porque se mi limita a resumir y cuantificar la información disponible del registro, como cantidades, frecuencias y categorìas màs comunes.
 
-**3. Determinación de problemas futuros con una red de telefonía y comparación con otras** **Clasificación:** Predictiva. \* **Razonamiento:** Es predictiva porque busca anticipar comportamientos futuros a partir de datos historicos. Por ejemplo, si se observa que el 75% de las peticiones provenientes de una red "X" generan errores, mientras que en otras redes la tasa es menor al 10%, se puede inferir que las futuras solicitudes de la red "x" tienen alta probalidad de fallar, mientras que en las demás el riesgo es bajo.
 
-**4. Asignación de un usuario al azar a grupos según su historial** **Clasificación:** Inferencial / Causal. \* **Razonamiento:** Se utiliza el historial para determinar la probabilidad de pertenencia a un grupo o para realizar experimentos (como un A/B testing) que midan el impacto de dicha asignación.
+**2. Preferencias de género literario según usuarios y rango de edad**
 
-------------------------------------------------------------------------
+**Clasificación:** Exploratoria.
+
+**Razonamiento:** Es Exploratoria porque busca identificar posibles relaciones o patrones entre variables, como la edad de los usuario y sus preferencias de visualización.
+
+**3. Determinación de problemas futuros con una red de telefonía y comparación con otras** **Clasificación:** Predictiva.
+
+**Razonamiento:** Utiliza datos históricos y comparativos para modelar comportamientos y anticipar eventos (fallos de red) que aún no han ocurrido.
+
+**4. Asignación de un usuario al azar a grupos según su historial**
+
+**Clasificación:** Inferencial / Causal.
+
+**Razonamiento:** Se utiliza el historial para determinar la probabilidad de pertenencia a un grupo o para realizar experimentos (como un A/B testing) que midan el impacto de dicha asignación.
 
 ### Pregunta 2: Escenario de Ciberseguridad
 
