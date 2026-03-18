@@ -32,41 +32,26 @@ library(readr)
 
 **Etapa: ASK**
 
--   ¿Qué servicios web están recibiendo conexiones?
+En esta etapa, se requiere primero comenzar con la propuesta de preguntas que ayuden a encaminar la investigación. Para ello, se plantean 3 preguntas:
 
-    -   Se plantea esta pregunta con el objetivo de identificar qué servicios se están exponiendo.
+-   **¿Qué equipos presentan comportamiento de servidor (reciben múltiples conexiones)?**
 
--   ¿Qué orígenes se repiten y son de clientes conocidos?
+    -   **Clasificación:** Descriptiva.
+    -   **Razonamiento:** Se plantea esta pregunta con el objetivo de identificar qué equipos podrían estar exponiendo servicios a la red.
 
-    -   Se plantea esta pregunta con el objetivo de identificar posibles falsos positivos.
+-   **¿Qué orígenes se repiten y son de clientes conocidos?**
 
--   ¿Qué comportamiento diferencia a servicios autorizados vs. no autorizados?
+    -   **Clasificación:** Exploratoria.
+    -   **Razonamiento:** Se plantea esta pregunta con el objetivo de identificar relaciones en los datos entre direcciones IP de origen y su frecuencia de aparición, permitiendo distinguir entre tráfico legítimo (clientes conocidos) y posibles accesos sospechosos.
 
-    -   Se plantea esta pregunta con el objetivo de saber identificar los servicios no autorizados.
+-   **¿Qué comportamiento diferencia a servicios autorizados vs. no autorizados?**
+
+    -   **Clasificación:** Exploratoria.
+    -   **Razonamiento:** Se plantea esta pregunta con el objetivo de descubrir patrones y relaciones en los datos (frecuencia de conexiones, diversidad de IPs, horarios, etc.) que permitan diferenciar entre servicios autorizados y no autorizados.
 
 **Etapa: GET**
 
--   Fuentes de datos
-
-    -   Logs de conexiones TCP:
-
-        -   IP origen
-
-        -   IP destino
-
-        -   Puerto origen/destino
-
-        -   Timestamp
-
-        -   Duración de la conexión
-
-    -   Inventario de servicios autorizados (lista blanca)
-
-    -   Información de red:
-
-        -   IPs internas vs externas
-
-        -   Usuarios asociados a cada máquina
+En esta etapa se procede a la recopilación de los datos necesarios para llevar a cabo el análisis. Las principales fuentes de información serán, por un lado, los logs de conexiones TCP, de los cuales se extraerán variables relevantes como la dirección IP de origen, la dirección IP de destino, los puertos de origen y destino, la marca temporal (timestamp) y la duración de cada conexión. Por otro lado, se utilizará un inventario de servicios autorizados (lista blanca), que permitirá distinguir entre comportamientos legítimos y no autorizados. Finalmente, se incorporará información adicional de red, como la diferenciación entre direcciones IP internas y externas, así como la asociación de cada máquina con su correspondiente usuario, lo que facilitará la identificación de posibles responsables.
 
 **Etapa: EXPLORE**
 
