@@ -364,59 +364,122 @@ Ciberamenazas</h1>
 <div id="pregunta-1-clasificación-de-preguntas" class="section level3">
 <h3>Pregunta 1: Clasificación de preguntas</h3>
 <p><strong>1. Ajuste de precios de peajes (conteo y tipo más frecuente,
-países con más vehículos)</strong> * <strong>Clasificación:</strong>
-Descriptiva. * <strong>Razonamiento:</strong> Es descriptiva porque se
-mi limita a resumir y cuantificar la información disponible del
-registro, como cantidades, frecuencias y categorìas màs comunes.</p>
+países con más vehículos)</strong></p>
+<p><strong>Clasificación:</strong> Descriptiva.
+<strong>Razonamiento:</strong> Es descriptiva porque se mi limita a
+resumir y cuantificar la información disponible del registro, como
+cantidades, frecuencias y categorìas màs comunes.</p>
 <p><strong>2. Preferencias de género literario según usuarios y rango de
-edad</strong> * <strong>Clasificación:</strong> Exploratoria. *
-<strong>Razonamiento:</strong> Es Exploratoria porque busca identificar
-posibles relaciones o patrones entre variables, como la edad de los
-usuario y sus preferencias de visualización.
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;
-42ae8831253620bb209625991c40b8ec9081d048</p>
+edad</strong></p>
+<p><strong>Clasificación:</strong> Exploratoria.</p>
+<p><strong>Razonamiento:</strong> Es Exploratoria porque busca
+identificar posibles relaciones o patrones entre variables, como la edad
+de los usuario y sus preferencias de visualización.</p>
 <p><strong>3. Determinación de problemas futuros con una red de
 telefonía y comparación con otras</strong>
-<strong>Clasificación:</strong> Predictiva. *
-<strong>Razonamiento:</strong> Utiliza datos históricos y comparativos
-para modelar comportamientos y anticipar eventos (fallos de red) que aún
-no han ocurrido.</p>
+<strong>Clasificación:</strong> Predictiva.</p>
+<p><strong>Razonamiento:</strong> Utiliza datos históricos y
+comparativos para modelar comportamientos y anticipar eventos (fallos de
+red) que aún no han ocurrido.</p>
 <p><strong>4. Asignación de un usuario al azar a grupos según su
-historial</strong> <strong>Clasificación:</strong> Inferencial / Causal.
-* <strong>Razonamiento:</strong> Se utiliza el historial para determinar
-la probabilidad de pertenencia a un grupo o para realizar experimentos
-(como un A/B testing) que midan el impacto de dicha asignación.</p>
-<hr />
+historial</strong></p>
+<p><strong>Clasificación:</strong> Inferencial / Causal.</p>
+<p><strong>Razonamiento:</strong> Se utiliza el historial para
+determinar la probabilidad de pertenencia a un grupo o para realizar
+experimentos (como un A/B testing) que midan el impacto de dicha
+asignación.</p>
 </div>
 <div id="pregunta-2-escenario-de-ciberseguridad" class="section level3">
 <h3>Pregunta 2: Escenario de Ciberseguridad</h3>
-<p><strong>Análisis y Resolución mediante Data Science:</strong></p>
+<p><strong>Etapa: ASK</strong></p>
 <ul>
-<li><p><strong>Obtención de datos:</strong> Los registros TCP se extraen
-de fuentes de red y de host. Principalmente de archivos
-<strong>PCAP</strong> capturados mediante <code>tcpdump</code> o
-Wireshark, y de logs de dispositivos perimetrales como
-<strong>Firewalls, IDS/IPS</strong> (Suricata/Snort) y SIEM. También se
-pueden obtener flujos de red consolidados (NetFlow/IPFIX).</p></li>
-<li><p><strong>Tratamiento de datos:</strong></p>
+<li><p>¿Qué servicios web están recibiendo conexiones?</p>
 <ul>
-<li><strong>Limpieza:</strong> Eliminación de duplicados y gestión de
-valores nulos en los flags TCP.</li>
-<li><strong>Filtrado:</strong> Segmentar por rangos de IP sospechosas,
-puertos críticos (80, 443, 22) y periodos de tiempo específicos.</li>
-<li><strong>Normalización:</strong> Convertir marcas de tiempo
-(timestamps) a un formato único y estructurar datos no organizados en
-DataFrames para facilitar el análisis estadístico.</li>
+<li>Se plantea esta pregunta con el objetivo de identificar qué
+servicios se están exponiendo.</li>
 </ul></li>
-<li><p><strong>Preguntas a resolver:</strong></p>
-<ol style="list-style-type: decimal">
-<li>¿Existe un volumen inusual de intentos de conexión fallidos (SYN sin
-ACK) que indique un escaneo de puertos o DoS?</li>
-<li>¿Hay patrones de transferencia de datos hacia IPs externas no
-autorizadas (exfiltración)?</li>
-<li>¿Cuál es la distribución de tráfico por protocolo y si existen
-anomalías en el tamaño de los paquetes?</li>
-</ol></li>
+<li><p>¿Qué orígenes se repiten y son de clientes conocidos?</p>
+<ul>
+<li>Se plantea esta pregunta con el objetivo de identificar posibles
+falsos positivos.</li>
+</ul></li>
+<li><p>¿Qué comportamiento diferencia a servicios autorizados vs. no
+autorizados?</p>
+<ul>
+<li>Se plantea esta pregunta con el objetivo de saber identificar los
+servicios no autorizados.</li>
+</ul></li>
+</ul>
+<p><strong>Etapa: GET</strong></p>
+<ul>
+<li><p>Fuentes de datos</p>
+<ul>
+<li><p>Logs de conexiones TCP:</p>
+<ul>
+<li><p>IP origen</p></li>
+<li><p>IP destino</p></li>
+<li><p>Puerto origen/destino</p></li>
+<li><p>Timestamp</p></li>
+<li><p>Duración de la conexión</p></li>
+</ul></li>
+<li><p>Inventario de servicios autorizados (lista blanca)</p></li>
+<li><p>Información de red:</p>
+<ul>
+<li><p>IPs internas vs externas</p></li>
+<li><p>Usuarios asociados a cada máquina</p></li>
+</ul></li>
+</ul></li>
+</ul>
+<p><strong>Etapa: EXPLORE</strong></p>
+<ul>
+<li><p><strong>Limpieza y transformación:</strong></p>
+<ul>
+<li><p>Filtrar tráfico interno vs externo</p></li>
+<li><p>Eliminación de duplicados y gestión de valores nulos en los flags
+TCP</p></li>
+<li><p>Normalizar timestamps.</p></li>
+<li><p>Identificar conexiones entrantes vs salientes.</p></li>
+<li><p>Agregar métricas por equipo:</p>
+<ul>
+<li><p>Nº de conexiones recibidas</p></li>
+<li><p>Nº de IPs únicas conectadas</p></li>
+<li><p>Frecuencia temporal</p></li>
+</ul></li>
+</ul></li>
+<li><p><strong>Análisis:</strong></p>
+<ul>
+<li><p>Identificar comportamiento tipo servidor.</p></li>
+<li><p>Comparación con línea base.</p></li>
+<li><p>Buscar actividad dentro y fuera de horario laboral.</p></li>
+<li><p>Segmentar por rangos de IP sospechosas, puertos críticos (80,
+443, 22) y periodos de tiempo específicos.</p></li>
+</ul></li>
+</ul>
+<p><strong>Etapa: MODEL</strong></p>
+<ul>
+<li><p><strong>Detección de anomalías</strong></p>
+<ul>
+<li><p>Detección de equipos con muchas conexiones entrantes.</p></li>
+<li><p>Detección de equipos con muchas IPs únicas.</p></li>
+</ul></li>
+<li><p><strong>Clasificación</strong></p>
+<ul>
+<li><p>Entrenar modelo supervisado con:</p>
+<ul>
+<li><p>Equipos con servicios autorizados</p></li>
+<li><p>Equipos normales</p></li>
+</ul></li>
+</ul></li>
+</ul>
+<p><strong>Etapa: COMMUNICATE AND VISUALIZE</strong></p>
+<ul>
+<li><p><strong>Comunicación:</strong> Se presentaría un Executive
+Dashboard con semáforos de riesgo (Rojo/Amarillo/Verde). A la dirección
+se le entrega un resumen de impacto de negocio (posible pérdida de datos
+o indisponibilidad), mientras que a los equipos técnicos se les
+proporciona el detalle de los indicadores de compromiso (IoC) y las
+recomendaciones de bloqueo inmediatas en las reglas del
+Firewall.</p></li>
 <li><p><strong>Datos y gráficos a obtener:</strong></p>
 <ul>
 <li><strong>Histogramas de frecuencia:</strong> Para detectar picos de
@@ -429,19 +492,17 @@ densidad de conexiones entre IPs de origen y destino.</li>
 <li><strong>Métricas:</strong> Tasa de error de conexión, latencia media
 y ratio de paquetes perdidos.</li>
 </ul></li>
-<li><p><strong>Comunicación:</strong> Se presentaría un
-<strong>Executive Dashboard</strong> con semáforos de riesgo
-(Rojo/Amarillo/Verde). A la dirección se le entrega un resumen de
-impacto de negocio (posible pérdida de datos o indisponibilidad),
-mientras que a los equipos técnicos se les proporciona el detalle de los
-indicadores de compromiso (IoC) y las recomendaciones de bloqueo
-inmediatas en las reglas del Firewall.</p></li>
 </ul>
 </div>
 <div id="import-dataset" class="section level2">
 <h2>Import Dataset</h2>
-<p>epa_http &lt;- read_table(“./epa-http.csv”, col_names =
+<p>library(readr) df &lt;- read_table(“./epa-http.csv”, col_names =
 c(“Origin”,“Timestamp”,“Method”,“URI”,“Protocol”,“Status”,“Bytes”))</p>
+<p>library(stringr) df<span class="math inline">\(tiempo_raw &lt;-
+str_extract(df\)</span>Timestamp, “\[.*?\]”) df<span class="math inline">\(tiempo_raw &lt;-
+str_remove_all(df\)</span>tiempo_raw, “\[|\]”)</p>
+<p>library(tidyr) df &lt;- df %&gt;% separate(tiempo_raw, into =
+c(“dia”, “hora”, “minuto”, “segundo”), sep = “:”)</p>
 </div>
 </div>
 
