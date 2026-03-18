@@ -22,7 +22,6 @@ library(readr)
 
 **Clasificación:** Descriptiva. **Razonamiento:** Es descriptiva porque se mi limita a resumir y cuantificar la información disponible del registro, como cantidades, frecuencias y categorìas màs comunes.
 
-
 **2. Preferencias de género literario según usuarios y rango de edad**
 
 **Clasificación:** Exploratoria.
@@ -62,64 +61,29 @@ En esta etapa, se requiere primero comenzar con la propuesta de preguntas que ay
 
 **Etapa: GET**
 
-En esta etapa se procede a la recopilación de los datos necesarios para llevar a cabo el análisis. Las principales fuentes de información serán, por un lado, los logs de conexiones TCP, de los cuales se extraerán variables relevantes como la dirección IP de origen, la dirección IP de destino, los puertos de origen y destino, la marca temporal (timestamp) y la duración de cada conexión. Por otro lado, se utilizará un inventario de servicios autorizados (lista blanca), que permitirá distinguir entre comportamientos legítimos y no autorizados. Finalmente, se incorporará información adicional de red, como la diferenciación entre direcciones IP internas y externas, así como la asociación de cada máquina con su correspondiente usuario, lo que facilitará la identificación de posibles responsables.
+En esta etapa se procede a la recopilación de los datos necesarios para llevar a cabo el análisis. Las principales fuentes de información serán, por un lado, los logs de conexiones TCP, de los cuales se extraerán variables relevantes como la dirección IP de origen, la dirección IP de destino, los puertos de origen y destino, timestamp y la duración de cada conexión. Por otro lado, se utilizará un inventario de servicios autorizados (lista blanca), que permitirá distinguir entre comportamientos legítimos y no autorizados. Finalmente, se incorporará información adicional de red, como la diferenciación entre direcciones IP internas y externas, así como la asociación de cada máquina con su correspondiente usuario, lo que facilitará la identificación de posibles responsables.
 
 **Etapa: EXPLORE**
 
--   **Limpieza y transformación:**
+En esta etapa se realiza un análisis exploratorio de los datos con el objetivo de identificar patrones, anomalías y posibles comportamientos sospechosos. En primer lugar, se lleva a cabo la limpieza y transformación de los datos, filtrando el tráfico para diferenciar entre conexiones internas y externas. Además, se eliminan duplicados y se gestionan los valores nulos, especialmente en los flags TCP, para asegurar la calidad de la información. También se normalizan los timestamps para trabajar con una referencia temporal consistente y se clasifican las conexiones en entrantes y salientes según la dirección del flujo.
 
-    -   Filtrar tráfico interno vs externo
+Una vez preparados los datos, se construyen métricas agregadas por equipo, como el número de conexiones recibidas, el número de direcciones IP únicas que se conectan a cada máquina y la frecuencia temporal de las conexiones. Estas métricas permiten caracterizar el comportamiento de cada equipo dentro de la red.
 
-    -   Eliminación de duplicados y gestión de valores nulos en los flags TCP
-
-    -   Normalizar timestamps.
-
-    -   Identificar conexiones entrantes vs salientes.
-
-    -   Agregar métricas por equipo:
-
-        -   Nº de conexiones recibidas
-
-        -   Nº de IPs únicas conectadas
-
-        -   Frecuencia temporal
-
--   **Análisis:**
-
-    -   Identificar comportamiento tipo servidor.
-
-    -   Comparación con línea base.
-
-    -   Buscar actividad dentro y fuera de horario laboral.
-
-    -   Segmentar por rangos de IP sospechosas, puertos críticos (80, 443, 22) y periodos de tiempo específicos.
+En cuanto al análisis, se busca identificar patrones compatibles con un comportamiento de servidor, como la recepción de múltiples conexiones desde distintos orígenes. Asimismo, se realiza una comparación con una línea base de comportamiento normal para detectar desviaciones significativas. También se analiza la distribución temporal de la actividad, prestando especial atención a conexiones realizadas fuera del horario laboral. Finalmente, se segmentan los datos según rangos de IP sospechosas, el uso de puertos críticos como 80, 443 y 22, y periodos de tiempo específicos, con el fin de aislar posibles casos de uso no autorizado.
 
 **Etapa: MODEL**
 
--   **Detección de anomalías**
+En esta etapa se aplican técnicas de modelado con el objetivo de identificar de forma sistemática los equipos sospechosos dentro de la red. En primer lugar, se aborda el problema mediante detección de anomalías, buscando identificar comportamientos que se desvíen significativamente de la norma. Para ello, se analizan métricas como el número de conexiones entrantes por equipo y la cantidad de direcciones IP únicas que se conectan a cada uno, ya que valores elevados en estos indicadores pueden sugerir un comportamiento propio de un servidor no autorizado.
 
-    -   Detección de equipos con muchas conexiones entrantes.
+Adicionalmente, se puede complementar el análisis mediante un enfoque de clasificación supervisada, en caso de disponer de datos etiquetados. En este caso, se entrenaría un modelo utilizando ejemplos de equipos con servicios autorizados y equipos con comportamiento normal, permitiendo así aprender patrones característicos de cada categoría. Una vez entrenado, el modelo podría utilizarse para clasificar nuevos equipos y detectar aquellos cuyo comportamiento se asemeje más al de un servicio expuesto.
 
-    -   Detección de equipos con muchas IPs únicas.
-
--   **Clasificación**
-
-    -   Entrenar modelo supervisado con:
-
-        -   Equipos con servicios autorizados
-
-        -   Equipos normales
+De este modo, la combinación de técnicas de detección de anomalías y clasificación permite no solo identificar casos claramente sospechosos, sino también mejorar la precisión del análisis al incorporar conocimiento previo sobre el comportamiento esperado en la red.
 
 **Etapa: COMMUNICATE AND VISUALIZE**
 
--   **Comunicación:** Se presentaría un Executive Dashboard con semáforos de riesgo (Rojo/Amarillo/Verde). A la dirección se le entrega un resumen de impacto de negocio (posible pérdida de datos o indisponibilidad), mientras que a los equipos técnicos se les proporciona el detalle de los indicadores de compromiso (IoC) y las recomendaciones de bloqueo inmediatas en las reglas del Firewall.
+En esta etapa se presentan los resultados del análisis de forma clara, comprensible y orientada a la toma de decisiones. Para ello, se propone la creación de un Executive Dashboard que incluya indicadores visuales tipo semáforo (Rojo/Amarillo/Verde), permitiendo identificar rápidamente el nivel de riesgo asociado a cada equipo analizado. A nivel directivo, se proporciona un resumen centrado en el impacto para el negocio, como posibles riesgos de pérdida de datos o problemas de disponibilidad. Por otro lado, a los equipos técnicos se les ofrece un mayor nivel de detalle, incluyendo indicadores de compromiso (IoC) y recomendaciones concretas, como la aplicación de reglas de bloqueo en el firewall.
 
--   **Datos y gráficos a obtener:**
-
-    -   **Histogramas de frecuencia:** Para detectar picos de tráfico en horas no laborables.
-    -   **Gráficos de dispersión (Scatter Plots):** Para identificar *outliers* en el volumen de bytes transferidos por sesión.
-    -   **Mapas de calor (Heatmaps):** Para visualizar la densidad de conexiones entre IPs de origen y destino.
-    -   **Métricas:** Tasa de error de conexión, latencia media y ratio de paquetes perdidos.
+En cuanto a los datos y visualizaciones, se emplean diferentes tipos de gráficos para facilitar la interpretación de los resultados. Los histogramas de frecuencia permiten detectar picos de tráfico, especialmente en horarios no laborables. Los gráficos de dispersión (scatter plots) ayudan a identificar valores atípicos en variables como el volumen de datos transferidos por sesión. Los mapas de calor (heatmaps) resultan útiles para visualizar la intensidad de conexiones entre direcciones IP de origen y destino. Finalmente, se incluyen métricas relevantes como la tasa de error de conexión, la latencia media y el ratio de paquetes perdidos, que aportan contexto adicional sobre el comportamiento de la red y ayudan a reforzar las conclusiones del análisis.
 
 ## Import Dataset
 
