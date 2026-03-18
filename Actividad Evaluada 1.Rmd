@@ -107,7 +107,7 @@ En cuanto a los datos y visualizaciones, se emplean diferentes tipos de gráfico
 
 ## Creaciòn de DB con cabeceras
 
-```{r limpieza, echo=FALSE, message=FALSE, warning=FALSE}
+```{r limpieza, echo=TRUE, message=FALSE, warning=FALSE}
 # Carga y limpieza inicial
 df <- read.table("epa-http.csv", header = FALSE, sep = " ", fill = TRUE, stringsAsFactors = FALSE)
 colnames(df) <- c("IP", "Time", "Request", "ResponseCode", "Bytes")
@@ -119,8 +119,7 @@ df$Bytes[is.na(df$Bytes)] <- 0
 
 ### Pregunta 1
 
-**¿Cuáles son las dimensiones del dataset cargado (número de filas y columnas)?**
-**Valor medio de la columna Bytes**
+**¿Cuáles son las dimensiones del dataset cargado (número de filas y columnas)?** **Valor medio de la columna Bytes**
 
 Para el cálculo de las dimensiones se ejecuta la siguiente línea de código:
 
@@ -132,5 +131,24 @@ Las dimensiones de la tabla son **`r ncol(df)`** columnas y **`r nrow(df)`** fil
 
 ### Pregunta 2
 
-**¿Cuáles son las dimensiones del dataset cargado (número de filas y columnas)?**
+**De las diferentes IPs de origen accediendo al servidor, ¿cuantas pertenecen a una IP claramente educativa (que contenga ".edu")?**
 
+```{r edu}
+# Buscamos las filas donde la columna IP (V1) contiene ".edu"
+ips_educativas <- grep(".edu", df$IP, value = TRUE)
+
+# Contamos cuántas hay en total
+total_educativas <- length(ips_educativas)
+
+# Si quieres saber cuántas IPs ÚNICAS educativas hay
+ips_unicas_edu <- length(unique(ips_educativas))
+```
+
+Explicación de los comandos:
+grep(".edu", df$IP): Busca la cadena de texto ".edu" dentro de la primera columna de tu tabla.
+
+length(...): Cuenta cuántos elementos se encontraron en la búsqueda anterior.
+
+unique(...): Se usa por si una misma universidad hizo muchas peticiones; esto te permite saber cuántas "entidades" educativas diferentes hay, aunque la pregunta suele referirse al total de registros.
+
+Al analizar el dataset, se identificó que existen **`r total_educativas`** peticiones provenientes de dominios educativos (que contienen ".edu"). Si filtramos por direcciones únicas, encontramos que hay **`r ips_unicas_edu`** instituciones educativas distintas accediendo al servidor.
