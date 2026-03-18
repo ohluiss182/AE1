@@ -14,6 +14,8 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(readr)
 library(tidyverse)
 library(stringr)
+library(knitr)
+library(dplyr)
 ```
 
 # 1. Data Science
@@ -278,3 +280,28 @@ Peticiones No-Estándar (Fuera de HTTP/0.2): r peticiones_no_http02
 Índice de Diversidad de Protocolo: r round(porcentaje_no_std, 2)% del tráfico total.
 
 La gran mayoría del tráfico opera bajo protocolos distintos a HTTP/0.2 (principalmente HTTP/1.0). Esto indica que la infraestructura soporta una amplia gama de clientes, pero sugiere la necesidad de monitorear versiones de protocolos obsoletos para asegurar la compatibilidad y seguridad del servicio.
+
+
+
+```{r tabla-protocolos, echo=FALSE}
+library(knitr)
+library(dplyr)
+
+# Creamos una tabla resumen
+resumen_tabla <- df_split %>%
+  group_by(Protocolo) %>%
+  summarise(
+    Total = n()
+  ) %>%
+  mutate(
+    Porcentaje = paste0(round((Total / sum(Total)) * 100, 2), "%")
+  ) %>%
+  arrange(desc(Total))
+
+# Generamos la tabla estética
+kable(resumen_tabla, 
+      caption = "Distribución de Peticiones por Protocolo HTTP",
+      col.names = c("Versión del Protocolo", "Número de Peticiones", "Cuota de Tráfico"),
+      align = "lcc") # l=left, c=center, c=center
+```
+
