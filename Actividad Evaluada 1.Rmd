@@ -216,7 +216,9 @@ Tras procesar la columna de tiempo y filtrar las peticiones de tipo "GET", se de
 Adicionalmente, se presenta la tabla de frecuencias obtenida:
 
 <details>
+
 <summary>Haga clic aquí para desplegar la tabla de frecuencias detallada</summary>
+
 ```{r tabla-frecuencias, echo=FALSE, toc=T}
 library(knitr)
 library(dplyr)
@@ -260,23 +262,35 @@ Tras filtrar el dataset para incluir únicamente las peticiones provenientes de 
 library(tidyverse)
 
 # 1. Limpiamos las comillas y separamos la columna 'Request' en tres: Tipo, URL y Protocolo
+
 df_split <- df %>%
   mutate(Request = str_replace_all(Request, '"', "")) %>%
   separate(Request, into = c("Tipo", "URL", "Protocolo"), sep = " ", extra = "merge", fill = "right")
 
+```
+
+**Sintaxis**
+
+-   separate(...): Esta es la forma más limpia de cumplir con lo que pide el enunciado. Crea tres columnas reales en tu data frame, lo que facilita enormemente el filtrado.
+
+```{r pregunta5}
+library(tidyverse)
+
 # 2. Contamos cuántas peticiones buscan exactamente la URL = "/"
+
 peticiones_raiz <- df_split %>%
   filter(URL == "/") %>%
   nrow()
+
 ```
 
-separate(...): Esta es la forma más limpia de cumplir con lo que pide el enunciado. Crea tres columnas reales en tu data frame, lo que facilita enormemente el filtrado.
+**Sintaxis**
 
-URL == "/": Al usar el operador de igualdad estricta ==, nos aseguramos de contar solo las que buscan la raíz, excluyendo otras como /Software.html o /icons/.
+-   URL == "/": Al usar el operador de igualdad estricta ==, nos aseguramos de contar solo las que buscan la raíz, excluyendo otras como /Software.html o /icons/.
 
-Limpieza de comillas: Si no quitas las comillas antes de separar, la columna "Tipo" se guardaría como "GET (con la comilla inicial), lo cual podría ensuciar tus datos.
+-   Limpieza de comillas: Si no quitas las comillas antes de separar, la columna "Tipo" se guardaría como "GET (con la comilla inicial), lo cual podría ensuciar tus datos.
 
-De las peticiones recibidas, un total de **`r peticiones_raiz`** buscan directamente la URL raíz (`/`).
+**Respuesta:** De las peticiones recibidas, un total de **`r peticiones_raiz`** buscan directamente la URL raíz (`/`).
 
 ### Pregunta 6
 
