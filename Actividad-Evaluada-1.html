@@ -698,15 +698,84 @@ provenientes de dominios .edu que solicitaron archivos con extensión
 </div>
 <div id="pregunta-5" class="section level3">
 <h3>Pregunta 5</h3>
-<p><strong>De Si separamos la petición en 3 partes (Tipo, Url,
-Protocolo), usando str_split y el separador ” ” (espacio), ¿Cúantas
-peticiones buscan directamente la URL = “/”?</strong></p>
+<p><strong>Si separamos la petición en 3 partes (Tipo, Url, Protocolo),
+usando str_split y el separador ” ” (espacio), ¿Cúantas peticiones
+buscan directamente la URL = “/”?</strong></p>
+<pre class="r"><code>library(tidyverse)
+
+# 1. Limpiamos las comillas y separamos la columna &#39;Request&#39; en tres: Tipo, URL y Protocolo
+df_split &lt;- df %&gt;%
+  mutate(Request = str_replace_all(Request, &#39;&quot;&#39;, &quot;&quot;)) %&gt;%
+  separate(Request, into = c(&quot;Tipo&quot;, &quot;URL&quot;, &quot;Protocolo&quot;), sep = &quot; &quot;, extra = &quot;merge&quot;, fill = &quot;right&quot;)
+
+# 2. Contamos cuántas peticiones buscan exactamente la URL = &quot;/&quot;
+peticiones_raiz &lt;- df_split %&gt;%
+  filter(URL == &quot;/&quot;) %&gt;%
+  nrow()</code></pre>
+<p>separate(…): Esta es la forma más limpia de cumplir con lo que pide
+el enunciado. Crea tres columnas reales en tu data frame, lo que
+facilita enormemente el filtrado.</p>
+<p>URL == “/”: Al usar el operador de igualdad estricta ==, nos
+aseguramos de contar solo las que buscan la raíz, excluyendo otras como
+/Software.html o /icons/.</p>
+<p>Limpieza de comillas: Si no quitas las comillas antes de separar, la
+columna “Tipo” se guardaría como “GET (con la comilla inicial), lo cual
+podría ensuciar tus datos.</p>
+<p>De las peticiones recibidas, un total de <strong>2382</strong> buscan
+directamente la URL raíz (<code>/</code>).</p>
 </div>
 <div id="pregunta-6" class="section level3">
 <h3>Pregunta 6</h3>
 <p><strong>Aprovechando que hemos separado la petición en 3 partes
 (Tipo, URL, Protocolo) ¿Cuantas peticiones NO tienen como protocolo
 “HTTP/0.2”?</strong></p>
+<p>En esta sección se evaluó la diversidad de protocolos de comunicación
+utilizados por los clientes que acceden al servidor. El objetivo es
+identificar peticiones que utilicen versiones no estándar o legacy que
+puedan representar un riesgo o una anomalía.</p>
+<p>Cálculo Técnico Para este análisis, se procesaron las peticiones
+separando sus componentes y filtrando aquellas que no corresponden al
+estándar específico solicitado:</p>
+<pre class="r"><code># Filtrado de protocolos distintos a HTTP/0.2
+peticiones_no_http02 &lt;- df_split %&gt;%
+  filter(Protocolo != &quot;HTTP/0.2&quot;) %&gt;%
+  nrow()
+
+# Cálculo de porcentaje para contexto gerencial
+porcentaje_no_std &lt;- (peticiones_no_http02 / nrow(df_split)) * 100</code></pre>
+<p>Tras analizar el tráfico total del servidor, se determinó lo
+siguiente:</p>
+<p>Peticiones No-Estándar (Fuera de HTTP/0.2): r
+peticiones_no_http02</p>
+<p>Índice de Diversidad de Protocolo: r round(porcentaje_no_std, 2)% del
+tráfico total.</p>
+<p>La gran mayoría del tráfico opera bajo protocolos distintos a
+HTTP/0.2 (principalmente HTTP/1.0). Esto indica que la infraestructura
+soporta una amplia gama de clientes, pero sugiere la necesidad de
+monitorear versiones de protocolos obsoletos para asegurar la
+compatibilidad y seguridad del servicio.</p>
+<table>
+<caption>Distribución de Peticiones por Protocolo HTTP</caption>
+<thead>
+<tr class="header">
+<th align="left">Versión del Protocolo</th>
+<th align="center">Número de Peticiones</th>
+<th align="center">Cuota de Tráfico</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">HTTP/1.0</td>
+<td align="center">47747</td>
+<td align="center">100%</td>
+</tr>
+<tr class="even">
+<td align="left">HTTP/0.2</td>
+<td align="center">1</td>
+<td align="center">0%</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
