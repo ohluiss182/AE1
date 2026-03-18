@@ -568,7 +568,6 @@ análisis.</p>
 <div id="import-dataset" class="section level2">
 <h2>Import Dataset</h2>
 </div>
-<<<<<<< HEAD
 <div id="creación-de-db-con-cabeceras" class="section level2">
 <h2>Creación de DB con cabeceras</h2>
 <p>Para poder realizar una línea base desde la cual comenzar con la
@@ -578,17 +577,6 @@ columnas para poder identificarlas mejor.</p>
 <pre class="r"><code># Carga y limpieza inicial
 df &lt;- read.table(&quot;epa-http.csv&quot;, header = FALSE, sep = &quot; &quot;, fill = TRUE, stringsAsFactors = FALSE)
 colnames(df) &lt;- c(&quot;IP&quot;, &quot;Time&quot;, &quot;Request&quot;, &quot;ResponseCode&quot;, &quot;Bytes&quot;)</code></pre>
-=======
-<div id="creaciòn-de-db-con-cabeceras" class="section level2">
-<h2>Creaciòn de DB con cabeceras</h2>
-<pre class="r"><code># Carga y limpieza inicial
-df &lt;- read.table(&quot;epa-http.csv&quot;, header = FALSE, sep = &quot; &quot;, fill = TRUE, stringsAsFactors = FALSE)
-colnames(df) &lt;- c(&quot;IP&quot;, &quot;Time&quot;, &quot;Request&quot;, &quot;ResponseCode&quot;, &quot;Bytes&quot;)
-
-# Convertir &quot;-&quot; a NA y la columna a numérica para que el cálculo funcione
-df$Bytes &lt;- as.numeric(ifelse(df$Bytes == &quot;-&quot;, NA, df$Bytes))
-df$Bytes[is.na(df$Bytes)] &lt;- 0</code></pre>
->>>>>>> 7c9366bb5944613213d6fcb293929bb8244b9f49
 <div id="pregunta-1" class="section level3">
 <h3>Pregunta 1</h3>
 <p><strong>¿Cuáles son las dimensiones del dataset cargado (número de
@@ -622,7 +610,7 @@ ips_educativas &lt;- grep(&quot;.edu&quot;, df$IP, value = TRUE)
 # Contamos cuántas hay en total
 total_educativas &lt;- length(ips_educativas)
 
-# Si quieres saber cuántas IPs ÚNICAS educativas hay (opcional pero recomendado)
+# Si quieres saber cuántas IPs ÚNICAS educativas hay
 ips_unicas_edu &lt;- length(unique(ips_educativas))</code></pre>
 <p>Explicación de los comandos: grep(“.edu”, df$IP): Busca la cadena de
 texto “.edu” dentro de la primera columna de tu tabla.</p>
@@ -637,6 +625,30 @@ registros.</p>
 (que contienen “.edu”). Si filtramos por direcciones únicas, encontramos
 que hay <strong>376</strong> instituciones educativas distintas
 accediendo al servidor.</p>
+</div>
+<div id="pregunta-3" class="section level3">
+<h3>Pregunta 3</h3>
+<p><strong>De todas las peticiones recibidas por el servidor ¿Cuál es la
+hora en la que hay mayor volumen de peticiones HTTP de tipo
+“GET”?</strong></p>
+</div>
+<div id="pregunta-4" class="section level3">
+<h3>Pregunta 4</h3>
+<p><strong>De las peticiones hechas por instituciones educativas (.edu),
+¿Cuántos bytes en total se han transmitido, en peticiones de descarga de
+ficheros de texto “.txt”?</strong></p>
+</div>
+<div id="pregunta-5" class="section level3">
+<h3>Pregunta 5</h3>
+<p><strong>De Si separamos la petición en 3 partes (Tipo, Url,
+Protocolo), usando str_split y el separador ” ” (espacio), ¿Cúantas
+peticiones buscan directamente la URL = “/”?</strong></p>
+</div>
+<div id="pregunta-6" class="section level3">
+<h3>Pregunta 6</h3>
+<p><strong>Aprovechando que hemos separado la petición en 3 partes
+(Tipo, URL, Protocolo) ¿Cuantas peticiones NO tienen como protocolo
+“HTTP/0.2”?</strong></p>
 </div>
 </div>
 </div>
