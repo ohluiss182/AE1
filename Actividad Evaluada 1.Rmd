@@ -172,34 +172,44 @@ Al analizar el dataset, se identificó que existen **`r total_educativas`** peti
 
 **De todas las peticiones recibidas por el servidor ¿Cuál es la hora en la que hay mayor volumen de peticiones HTTP de tipo "GET"?**
 
-```{r get}
-library(tidyverse)
+Para responder la pregunta, es requerido primero revisar el formato utilizado. La columna "Time" tiene el formato [DD:HH:MM:SS], donde los elementos son:
 
-# 1. Extraemos la hora. El formato es [DD:HH:MM:SS]
+-   DD: Día del mes cuando ocurre el evento.
+
+-   HH: Hora del día cuando ocurre el evento.
+
+-   MM: Minuto de la hora cuando ocurre el evento.
+
+-   SS: Segundo del minuto cuando ocurre el evento.
+
+En ese sentido, requerimos primero extraer el segundo elemento de la columna "Time", y filtramos para obtener sólo los request del tipo GET.:
+
+```{r get1}
+# Extraemos la hora. El formato es [DD:HH:MM:SS]
 # Al separar por ":", la hora es el segundo elemento.
 df_get <- df %>%
   mutate(Hora = str_split_fixed(Time, ":", 4)[, 2]) %>%
   filter(str_detect(Request, "GET")) # Filtramos solo las peticiones GET
+```
 
-# 2. Contamos las peticiones por hora
+A continuación, contamos las peticiones por hora y creamos una tabla de frecuencias, que nos dice cuántas filas hay por cada hora del día.
+
+```{r get2}
+# Contamos las peticiones por hora
 conteo_horas <- df_get %>%
   group_by(Hora) %>%
   tally(sort = TRUE)
+```
 
-# 3. Obtenemos la hora con el valor máximo
+Finalmente, obtenemos los valores que se requieren mediante:
+
+```{r get3}
+# Obtenemos la hora con el valor máximo
 hora_punta <- conteo_horas$Hora[1]
 total_peticiones_get <- conteo_horas$n[1]
 ```
 
-Explicación del procedimiento:
-Extracción de la hora: Como el campo Time viene como [29:23:53:25], usamos el separador : para dividir la cadena. La hora siempre ocupa la segunda posición.
-
-Filtrado GET: Es fundamental usar filter con str_detect o grep sobre la columna de la petición para no contar otros métodos como POST o HEAD.
-
-Agrupación: group_by(Hora) %>% tally() crea una tabla de frecuencias que nos dice cuántas filas hay por cada hora del día.
-
 Tras procesar la columna de tiempo y filtrar las peticiones de tipo "GET", se determinó que la hora con mayor actividad es la hora **`r hora_punta`**, registrando un total de **`r total_peticiones_get`** peticiones de este tipo.
-
 
 ### Pregunta 4
 
@@ -217,8 +227,7 @@ df_txt_edu <- df %>%
 total_bytes_edu_txt <- sum(df_txt_edu$Bytes, na.rm = TRUE)
 ```
 
-Detalles importantes para esta pregunta:
-str_detect(Request, ".txt"): Este comando busca la extensión dentro de la cadena de la petición. Es más seguro que buscar solo en la URL si aún no has separado las columnas.
+Detalles importantes para esta pregunta: str_detect(Request, ".txt"): Este comando busca la extensión dentro de la cadena de la petición. Es más seguro que buscar solo en la URL si aún no has separado las columnas.
 
 na.rm = TRUE: Es vital incluirlo en la función sum(). Como vimos en la limpieza inicial, si hay una sola petición con un guion (convertido a NA), el resultado de la suma sería NA sin este parámetro.
 

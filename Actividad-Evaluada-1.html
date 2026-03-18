@@ -604,22 +604,29 @@ df$Bytes[is.na(df$Bytes)] &lt;- 0</code></pre>
 <p><strong>De las diferentes IPs de origen accediendo al servidor,
 ¿cuantas pertenecen a una IP claramente educativa (que contenga
 “.edu”)?</strong></p>
+<p>Para poder dar respuesta a esta pregunta, es esencial estructurar lo
+que vamos a realizar. Para ello, se van a realizar 3 comandos que serán
+explicados a continuación:</p>
+<ul>
+<li><strong>Comando 1:</strong> <code>grep(&quot;.edu&quot;, df$IP)</code>. Este
+comando busca la cadena de texto “.edu” dentro de la columna “IP” en el
+dataset.</li>
+</ul>
 <pre class="r"><code># Buscamos las filas donde la columna IP (V1) contiene &quot;.edu&quot;
-ips_educativas &lt;- grep(&quot;.edu&quot;, df$IP, value = TRUE)
-
-# Contamos cuántas hay en total
-total_educativas &lt;- length(ips_educativas)
-
-# Si quieres saber cuántas IPs ÚNICAS educativas hay
+ips_educativas &lt;- grep(&quot;.edu&quot;, df$IP, value = TRUE)</code></pre>
+<ul>
+<li><strong>Comando 2:</strong> <code>length(...)</code>. Cuenta cuántos
+elementos se encontraron en la búsqueda anterior.</li>
+</ul>
+<pre class="r"><code># Contamos cuántas hay en total
+total_educativas &lt;- length(ips_educativas)</code></pre>
+<ul>
+<li><strong>Comando 3:</strong> <code>unique(...)</code>. Se usa por si
+una misma universidad hizo muchas peticiones; esto permite saber cuántas
+“entidades” educativas diferentes hay.</li>
+</ul>
+<pre class="r"><code># Si quieres saber cuántas IPs ÚNICAS educativas hay
 ips_unicas_edu &lt;- length(unique(ips_educativas))</code></pre>
-<p>Explicación de los comandos: grep(“.edu”, df$IP): Busca la cadena de
-texto “.edu” dentro de la primera columna de tu tabla.</p>
-<p>length(…): Cuenta cuántos elementos se encontraron en la búsqueda
-anterior.</p>
-<p>unique(…): Se usa por si una misma universidad hizo muchas
-peticiones; esto te permite saber cuántas “entidades” educativas
-diferentes hay, aunque la pregunta suele referirse al total de
-registros.</p>
 <p>Al analizar el dataset, se identificó que existen
 <strong>6539</strong> peticiones provenientes de dominios educativos
 (que contienen “.edu”). Si filtramos por direcciones únicas, encontramos
@@ -631,8 +638,6 @@ accediendo al servidor.</p>
 <p><strong>De todas las peticiones recibidas por el servidor ¿Cuál es la
 hora en la que hay mayor volumen de peticiones HTTP de tipo
 “GET”?</strong></p>
-<<<<<<< HEAD
-=======
 <pre class="r"><code>library(tidyverse)
 
 # 1. Extraemos la hora. El formato es [DD:HH:MM:SS]
@@ -661,7 +666,6 @@ frecuencias que nos dice cuántas filas hay por cada hora del día.</p>
 “GET”, se determinó que la hora con mayor actividad es la hora
 <strong>14</strong>, registrando un total de <strong>4546</strong>
 peticiones de este tipo.</p>
->>>>>>> eb7a723ec2873823760b0277451dbce47fbac76c
 </div>
 <div id="pregunta-4" class="section level3">
 <h3>Pregunta 4</h3>
