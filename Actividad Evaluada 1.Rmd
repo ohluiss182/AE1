@@ -36,7 +36,7 @@ library(readr)
 
 **Clasificación:** Inferencial / Causal.
 
-**Razonamiento:** Se utiliza el historial para determinar la probabilidad de pertenencia a un grupo o para realizar experimentos (como un A/B testing) que midan el impacto de dicha asignación.
+**Razonamiento:** Es inferencial causal porque, a partir de datos históricos, se identifican patrones de comportamiento y se utiliza esa información para asignar a un nuevo usuario a un grupo determinado según sus características similares.
 
 ### Pregunta 2: Escenario de Ciberseguridad
 
