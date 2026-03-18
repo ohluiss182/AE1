@@ -234,25 +234,36 @@ kable(conteo_horas,
 
 **De las peticiones hechas por instituciones educativas (.edu), ¿Cuántos bytes en total se han transmitido, en peticiones de descarga de ficheros de texto ".txt"?**
 
+Para responder esta pregunta, primero debemos filtrar únicamente las solicitudes que cumplan con dos condiciones:
+
+1.  Que provengan de instituciones educativas, es decir, de direcciones IP o dominios que contengan "**.edu**"
+2.  Que correspondan a solicitudes de archivos de texto con extensión "**.txt**"
+
+Una vez obtenido ese subconjunto de datos, se procede a sumar la columna **Bytes** para conocer el total de información transmitidad. Para ello, se realizarán 3 comandos que se explican a continuación:
+
+**Comando 1:** Este comando filtra únicamente las filas donde la columna **IP** contiene la cadena "**.edu**", es decir, las peticiones realizadas por instituciones educativas.
+
+**Comando 2:** Sobre el subconjunto anterior, este comando conserva solo las filas en las que la columna **Request** contiene la cadena "**.txt**", identificando así las solicitudes de descarga de archivos de texto.
+
+**Comando 3:** Finalmente, este comando suma todos los valores de la columna **Bytes** del subconjunto filtrado. El parámetro **na.rm = TRUE** permite ignorar valores faltantes para que no afecten el resultado final.
+
 ```{r txt}
-# 1. Filtrar instituciones educativas (.edu)
-# 2. Filtrar peticiones que contengan ".txt"
-# 3. Calcular la suma de la columna Bytes (manejando NAs)
+# Comando 1. Filtramos las peticiones provenientes de instituciones educativas (.edu):
 
 df_txt_edu <- df %>%
   filter(str_detect(IP, ".edu")) %>%
+  
+# Comando 2. Dentro de las peticiones educativas, filtramos las solicitudes de archivos ".txt"
+  
   filter(str_detect(Request, ".txt"))
 
+# Comando 3. Sumamos el total de Bytes transmitidos en esas solicitudes
+
 total_bytes_edu_txt <- sum(df_txt_edu$Bytes, na.rm = TRUE)
+
 ```
 
-Detalles importantes para esta pregunta: str_detect(Request, ".txt"): Este comando busca la extensión dentro de la cadena de la petición. Es más seguro que buscar solo en la URL si aún no has separado las columnas.
-
-na.rm = TRUE: Es vital incluirlo en la función sum(). Como vimos en la limpieza inicial, si hay una sola petición con un guion (convertido a NA), el resultado de la suma sería NA sin este parámetro.
-
-format(..., scientific = FALSE): Se usa en el texto en línea para que R no muestre el número en notación científica (ej. 2.5e+07), facilitando la lectura del resultado final.
-
-Tras filtrar el dataset para incluir únicamente las peticiones provenientes de dominios .edu que solicitaron archivos con extensión .txt, se calculó que el volumen total de información transmitida fue de **`r format(total_bytes_edu_txt, scientific = FALSE)`** bytes.
+Al analizar el dataset, se identificó que el volumen total de información transmitida en peticiones realziadas por instituciones educativas (.edu) para descargar archivos de texto con extensión "**.txt**" fue de **`r format(total_bytes_edu_txt, scientific = FALSE)`** bytes.
 
 ### Pregunta 5
 
@@ -282,7 +293,6 @@ peticiones_raiz <- df_split %>%
 -   URL == "/": Al usar el operador de igualdad estricta ==, nos aseguramos de contar solo las que buscan la raíz, excluyendo otras como /Software.html o /icons/.
 
 -   Limpieza de comillas: Si no quitas las comillas antes de separar, la columna "Tipo" se guardaría como "GET (con la comilla inicial), lo cual podría ensuciar tus datos.
-
 
 **Respuesta:** De las peticiones recibidas, un total de **`r peticiones_raiz`** buscan directamente la URL raíz (`/`).
 
