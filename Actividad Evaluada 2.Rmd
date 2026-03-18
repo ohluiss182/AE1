@@ -1,0 +1,42 @@
+---
+title: "Actividad Evaluable 2: Seminario Internacional en Herramientas y Técnicas de Detección de Ciberamenazas"
+author: "Grupo CJLR"
+date: "19 de marzo de 2026"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+# Configuración global de los chunks
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{r librerias}
+library(readr)
+library(tidyverse)
+library(stringr)
+library(knitr)
+library(dplyr)
+library(DT)
+```
+
+# 1. Datos Elegantes + Análisis de Datos con Web Scrapping
+
+## Pregunta 1
+
+### 1. Descargar la página web de la URL indicada, y almacenarlo en un formato de R apto para ser tratado.
+
+### 2. Analizar el contenido de la web, buscando el título de la página (que en HTML se etiqueta como “title”).
+
+### 3. Analizar el contenido de la web, buscando todos los enlaces (que en HTML se etiquetan como “a”), buscando el texto del enlace, así como la URL.
+
+### 4. Generar una tabla con cada enlace encontrado, indicando el texto que acompaña el enlace, y el número de veces que aparece un enlace con ese mismo objetivo.
+
+### 5. Para cada enlace, seguirlo e indicar si está activo (podemos usar el código de status HTTP al hacer una petición a esa URL).
+
+## Pregunta 2
+
+### 1.Un histograma con la frecuencia de aparición de los enlaces, pero separado por URLs absolutas (con “http…”) y URLs relativas.
+
+### 2. Un gráfico de barras indicando la suma de enlaces que apuntan a otros dominios o servicios (distinto a https://www.mediawiki.org en el caso de ejemplo) vs. la suma de los otros enlaces.
+
+### 3. Un gráfico de tarta (pie chart) indicando los porcentajes de Status de nuestro análisis.
