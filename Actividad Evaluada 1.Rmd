@@ -343,3 +343,13 @@ kable(resumen_tabla,
       col.names = c("Versión del Protocolo", "Número de Peticiones", "Cuota de Tráfico"),
       align = "lcc") # l=left, c=center, c=center
 ```
+
+```{r actividad2avance, include=T}
+# Cambio de variables
+df_2 <- df_split
+df_2$ResponseCode <-  as.factor(df_2$ResponseCode)
+df_2$Tipo <- as.factor(df_2$Tipo)
+
+# Cambio de columna Time
+df_2$Time <- strptime(df_2$Time,"[%d:%H:%M:%S]")
+```
