@@ -215,6 +215,8 @@ Tras procesar la columna de tiempo y filtrar las peticiones de tipo "GET", se de
 
 Adicionalmente, se presenta la tabla de frecuencias obtenida:
 
+<details>
+<summary>Haga clic aquí para desplegar la tabla de frecuencias detallada</summary>
 ```{r tabla-frecuencias, echo=FALSE, toc=T}
 library(knitr)
 library(dplyr)
