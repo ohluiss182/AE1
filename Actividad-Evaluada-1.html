@@ -358,7 +358,9 @@ Ciberamenazas</h1>
 </div>
 
 
-<pre class="r"><code>library(readr)</code></pre>
+<pre class="r"><code>library(readr)
+library(tidyverse)
+library(stringr)</code></pre>
 <div id="data-science" class="section level1">
 <h1>1. Data Science</h1>
 <div id="pregunta-1-clasificación-de-preguntas" class="section level3">
@@ -378,58 +380,68 @@ de los usuario y sus preferencias de visualización.</p>
 <p><strong>3. Determinación de problemas futuros con una red de
 telefonía y comparación con otras</strong>
 <strong>Clasificación:</strong> Predictiva.</p>
-<p><strong>Razonamiento:</strong> Utiliza datos históricos y
-comparativos para modelar comportamientos y anticipar eventos (fallos de
-red) que aún no han ocurrido.</p>
+<p><strong>Razonamiento:</strong> Es predictiva porque busca anticipar
+comportamientos futuros a partir de datos historicos. Por ejemplo, si se
+observa que el 75% de las peticiones provenientes de una red “X” generan
+errores, mientras que en otras redes la tasa es menor al 10%, se puede
+inferir que las futuras solicitudes de la red “x” tienen alta probalidad
+de fallar, mientras que en las demás el riesgo es bajo.</p>
 <p><strong>4. Asignación de un usuario al azar a grupos según su
 historial</strong></p>
 <p><strong>Clasificación:</strong> Inferencial / Causal.</p>
-<p><strong>Razonamiento:</strong> Se utiliza el historial para
-determinar la probabilidad de pertenencia a un grupo o para realizar
-experimentos (como un A/B testing) que midan el impacto de dicha
-asignación.</p>
+<p><strong>Razonamiento:</strong> Es inferencial causal porque, a partir
+de datos históricos, se identifican patrones de comportamiento y se
+utiliza esa información para asignar a un nuevo usuario a un grupo
+determinado según sus características similares.</p>
 </div>
 <div id="pregunta-2-escenario-de-ciberseguridad" class="section level3">
 <h3>Pregunta 2: Escenario de Ciberseguridad</h3>
 <p><strong>Etapa: ASK</strong></p>
+<p>En esta etapa, se requiere primero comenzar con la propuesta de
+preguntas que ayuden a encaminar la investigación. Para ello, se
+plantean 3 preguntas:</p>
 <ul>
-<li><p>¿Qué servicios web están recibiendo conexiones?</p>
+<li><p><strong>¿Qué equipos presentan comportamiento de servidor
+(reciben múltiples conexiones)?</strong></p>
 <ul>
-<li>Se plantea esta pregunta con el objetivo de identificar qué
-servicios se están exponiendo.</li>
+<li><strong>Clasificación:</strong> Descriptiva.</li>
+<li><strong>Razonamiento:</strong> Se plantea esta pregunta con el
+objetivo de identificar qué equipos podrían estar exponiendo servicios a
+la red.</li>
 </ul></li>
-<li><p>¿Qué orígenes se repiten y son de clientes conocidos?</p>
+<li><p><strong>¿Qué orígenes se repiten y son de clientes
+conocidos?</strong></p>
 <ul>
-<li>Se plantea esta pregunta con el objetivo de identificar posibles
-falsos positivos.</li>
+<li><strong>Clasificación:</strong> Exploratoria.</li>
+<li><strong>Razonamiento:</strong> Se plantea esta pregunta con el
+objetivo de identificar relaciones en los datos entre direcciones IP de
+origen y su frecuencia de aparición, permitiendo distinguir entre
+tráfico legítimo (clientes conocidos) y posibles accesos
+sospechosos.</li>
 </ul></li>
-<li><p>¿Qué comportamiento diferencia a servicios autorizados vs. no
-autorizados?</p>
+<li><p><strong>¿Qué comportamiento diferencia a servicios autorizados
+vs. no autorizados?</strong></p>
 <ul>
-<li>Se plantea esta pregunta con el objetivo de saber identificar los
-servicios no autorizados.</li>
+<li><strong>Clasificación:</strong> Exploratoria.</li>
+<li><strong>Razonamiento:</strong> Se plantea esta pregunta con el
+objetivo de descubrir patrones y relaciones en los datos (frecuencia de
+conexiones, diversidad de IPs, horarios, etc.) que permitan diferenciar
+entre servicios autorizados y no autorizados.</li>
 </ul></li>
 </ul>
 <p><strong>Etapa: GET</strong></p>
-<ul>
-<li><p>Fuentes de datos</p>
-<ul>
-<li><p>Logs de conexiones TCP:</p>
-<ul>
-<li><p>IP origen</p></li>
-<li><p>IP destino</p></li>
-<li><p>Puerto origen/destino</p></li>
-<li><p>Timestamp</p></li>
-<li><p>Duración de la conexión</p></li>
-</ul></li>
-<li><p>Inventario de servicios autorizados (lista blanca)</p></li>
-<li><p>Información de red:</p>
-<ul>
-<li><p>IPs internas vs externas</p></li>
-<li><p>Usuarios asociados a cada máquina</p></li>
-</ul></li>
-</ul></li>
-</ul>
+<p>En esta etapa se procede a la recopilación de los datos necesarios
+para llevar a cabo el análisis. Las principales fuentes de información
+serán, por un lado, los logs de conexiones TCP, de los cuales se
+extraerán variables relevantes como la dirección IP de origen, la
+dirección IP de destino, los puertos de origen y destino, la marca
+temporal (timestamp) y la duración de cada conexión. Por otro lado, se
+utilizará un inventario de servicios autorizados (lista blanca), que
+permitirá distinguir entre comportamientos legítimos y no autorizados.
+Finalmente, se incorporará información adicional de red, como la
+diferenciación entre direcciones IP internas y externas, así como la
+asociación de cada máquina con su correspondiente usuario, lo que
+facilitará la identificación de posibles responsables.</p>
 <p><strong>Etapa: EXPLORE</strong></p>
 <ul>
 <li><p><strong>Limpieza y transformación:</strong></p>
@@ -494,15 +506,39 @@ y ratio de paquetes perdidos.</li>
 </ul></li>
 </ul>
 </div>
+</div>
+<div id="introducción-a-r" class="section level1">
+<h1>2. Introducción a R</h1>
 <div id="import-dataset" class="section level2">
 <h2>Import Dataset</h2>
-<p>library(readr) df &lt;- read_table(“./epa-http.csv”, col_names =
-c(“Origin”,“Timestamp”,“Method”,“URI”,“Protocol”,“Status”,“Bytes”))</p>
+</div>
+<div id="creaciòn-de-db-con-cabeceras" class="section level2">
+<h2>Creaciòn de DB con cabeceras</h2>
+<pre class="r"><code># Leer el CSV 
+df &lt;- read.table(&quot;epa-http.csv&quot;, header = FALSE, sep = &quot; &quot;, fill = TRUE, stringsAsFactors = FALSE)
+
+# Asignar nombres temporales para trabajar mejor
+colnames(df) &lt;- c(&quot;IP&quot;, &quot;Time&quot;, &quot;Request&quot;, &quot;ResponseCode&quot;, &quot;Bytes&quot;)</code></pre>
+<div id="pregunta-1" class="section level3">
+<h3>Pregunta 1</h3>
+<ol style="list-style-type: decimal">
+<li>Cuales son las dimensiones del dataset cargado (número de filas y
+columnas)</li>
+</ol>
+<p>Para el calculo de la dimensiones se utiliza ejecuta la siguiente
+linea de codigo: Las dimensiones de la tabla son 5 columnas y 47748
+filas. El valor medio de la columna Bytes es NA.</p>
+<pre class="r"><code>dim(df)</code></pre>
+<pre><code>## [1] 47748     5</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Valor medio de la columna Bytes</li>
+</ol>
 <p>library(stringr) df<span class="math inline">\(tiempo_raw &lt;-
-str_extract(df\)</span>Timestamp, “\[.*?\]”) df<span class="math inline">\(tiempo_raw &lt;-
+str_extract(df\)</span>Time, “\[.*?\]”) df<span class="math inline">\(tiempo_raw &lt;-
 str_remove_all(df\)</span>tiempo_raw, “\[|\]”)</p>
 <p>library(tidyr) df &lt;- df %&gt;% separate(tiempo_raw, into =
 c(“dia”, “hora”, “minuto”, “segundo”), sep = “:”)</p>
+</div>
 </div>
 </div>
 
