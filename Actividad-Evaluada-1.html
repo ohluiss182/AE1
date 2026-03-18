@@ -665,6 +665,29 @@ peticiones de este tipo.</p>
 <p><strong>De las peticiones hechas por instituciones educativas (.edu),
 ¿Cuántos bytes en total se han transmitido, en peticiones de descarga de
 ficheros de texto “.txt”?</strong></p>
+<pre class="r"><code># 1. Filtrar instituciones educativas (.edu)
+# 2. Filtrar peticiones que contengan &quot;.txt&quot;
+# 3. Calcular la suma de la columna Bytes (manejando NAs)
+
+df_txt_edu &lt;- df %&gt;%
+  filter(str_detect(IP, &quot;.edu&quot;)) %&gt;%
+  filter(str_detect(Request, &quot;.txt&quot;))
+
+total_bytes_edu_txt &lt;- sum(df_txt_edu$Bytes, na.rm = TRUE)</code></pre>
+<p>Detalles importantes para esta pregunta: str_detect(Request, “.txt”):
+Este comando busca la extensión dentro de la cadena de la petición. Es
+más seguro que buscar solo en la URL si aún no has separado las
+columnas.</p>
+<p>na.rm = TRUE: Es vital incluirlo en la función sum(). Como vimos en
+la limpieza inicial, si hay una sola petición con un guion (convertido a
+NA), el resultado de la suma sería NA sin este parámetro.</p>
+<p>format(…, scientific = FALSE): Se usa en el texto en línea para que R
+no muestre el número en notación científica (ej. 2.5e+07), facilitando
+la lectura del resultado final.</p>
+<p>Tras filtrar el dataset para incluir únicamente las peticiones
+provenientes de dominios .edu que solicitaron archivos con extensión
+.txt, se calculó que el volumen total de información transmitida fue de
+<strong>3017871</strong> bytes.</p>
 </div>
 <div id="pregunta-5" class="section level3">
 <h3>Pregunta 5</h3>

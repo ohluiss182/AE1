@@ -194,9 +194,31 @@ Agrupación: group_by(Hora) %>% tally() crea una tabla de frecuencias que nos di
 
 Tras procesar la columna de tiempo y filtrar las peticiones de tipo "GET", se determinó que la hora con mayor actividad es la hora **`r hora_punta`**, registrando un total de **`r total_peticiones_get`** peticiones de este tipo.
 
+
 ### Pregunta 4
 
 **De las peticiones hechas por instituciones educativas (.edu), ¿Cuántos bytes en total se han transmitido, en peticiones de descarga de ficheros de texto ".txt"?**
+
+```{r txt}
+# 1. Filtrar instituciones educativas (.edu)
+# 2. Filtrar peticiones que contengan ".txt"
+# 3. Calcular la suma de la columna Bytes (manejando NAs)
+
+df_txt_edu <- df %>%
+  filter(str_detect(IP, ".edu")) %>%
+  filter(str_detect(Request, ".txt"))
+
+total_bytes_edu_txt <- sum(df_txt_edu$Bytes, na.rm = TRUE)
+```
+
+Detalles importantes para esta pregunta:
+str_detect(Request, ".txt"): Este comando busca la extensión dentro de la cadena de la petición. Es más seguro que buscar solo en la URL si aún no has separado las columnas.
+
+na.rm = TRUE: Es vital incluirlo en la función sum(). Como vimos en la limpieza inicial, si hay una sola petición con un guion (convertido a NA), el resultado de la suma sería NA sin este parámetro.
+
+format(..., scientific = FALSE): Se usa en el texto en línea para que R no muestre el número en notación científica (ej. 2.5e+07), facilitando la lectura del resultado final.
+
+Tras filtrar el dataset para incluir únicamente las peticiones provenientes de dominios .edu que solicitaron archivos con extensión .txt, se calculó que el volumen total de información transmitida fue de **`r format(total_bytes_edu_txt, scientific = FALSE)`** bytes.
 
 ### Pregunta 5
 
