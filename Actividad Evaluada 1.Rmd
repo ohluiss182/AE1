@@ -8,3 +8,7 @@ output:
     toc_float: true
     theme: united
 ---
+## Import Dataset
+
+epa_http <- read_table("./epa-http.csv",
+ col_names = c("Origin","Timestamp","Method","URI","Protocol","Status","Bytes"))
