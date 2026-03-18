@@ -267,15 +267,6 @@ df_split <- df %>%
   mutate(Request = str_replace_all(Request, '"', "")) %>%
   separate(Request, into = c("Tipo", "URL", "Protocolo"), sep = " ", extra = "merge", fill = "right")
 
-```
-
-**Sintaxis**
-
--   separate(...): Esta es la forma más limpia de cumplir con lo que pide el enunciado. Crea tres columnas reales en tu data frame, lo que facilita enormemente el filtrado.
-
-```{r pregunta5}
-library(tidyverse)
-
 # 2. Contamos cuántas peticiones buscan exactamente la URL = "/"
 
 peticiones_raiz <- df_split %>%
@@ -286,9 +277,12 @@ peticiones_raiz <- df_split %>%
 
 **Sintaxis**
 
+-   separate(...): Esta es la forma más limpia de cumplir con lo que pide el enunciado. Crea tres columnas reales en tu data frame, lo que facilita enormemente el filtrado.
+
 -   URL == "/": Al usar el operador de igualdad estricta ==, nos aseguramos de contar solo las que buscan la raíz, excluyendo otras como /Software.html o /icons/.
 
 -   Limpieza de comillas: Si no quitas las comillas antes de separar, la columna "Tipo" se guardaría como "GET (con la comilla inicial), lo cual podría ensuciar tus datos.
+
 
 **Respuesta:** De las peticiones recibidas, un total de **`r peticiones_raiz`** buscan directamente la URL raíz (`/`).
 
