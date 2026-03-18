@@ -568,6 +568,7 @@ análisis.</p>
 <div id="import-dataset" class="section level2">
 <h2>Import Dataset</h2>
 </div>
+<<<<<<< HEAD
 <div id="creación-de-db-con-cabeceras" class="section level2">
 <h2>Creación de DB con cabeceras</h2>
 <p>Para poder realizar una línea base desde la cual comenzar con la
@@ -577,6 +578,17 @@ columnas para poder identificarlas mejor.</p>
 <pre class="r"><code># Carga y limpieza inicial
 df &lt;- read.table(&quot;epa-http.csv&quot;, header = FALSE, sep = &quot; &quot;, fill = TRUE, stringsAsFactors = FALSE)
 colnames(df) &lt;- c(&quot;IP&quot;, &quot;Time&quot;, &quot;Request&quot;, &quot;ResponseCode&quot;, &quot;Bytes&quot;)</code></pre>
+=======
+<div id="creaciòn-de-db-con-cabeceras" class="section level2">
+<h2>Creaciòn de DB con cabeceras</h2>
+<pre class="r"><code># Carga y limpieza inicial
+df &lt;- read.table(&quot;epa-http.csv&quot;, header = FALSE, sep = &quot; &quot;, fill = TRUE, stringsAsFactors = FALSE)
+colnames(df) &lt;- c(&quot;IP&quot;, &quot;Time&quot;, &quot;Request&quot;, &quot;ResponseCode&quot;, &quot;Bytes&quot;)
+
+# Convertir &quot;-&quot; a NA y la columna a numérica para que el cálculo funcione
+df$Bytes &lt;- as.numeric(ifelse(df$Bytes == &quot;-&quot;, NA, df$Bytes))
+df$Bytes[is.na(df$Bytes)] &lt;- 0</code></pre>
+>>>>>>> 7c9366bb5944613213d6fcb293929bb8244b9f49
 <div id="pregunta-1" class="section level3">
 <h3>Pregunta 1</h3>
 <p><strong>¿Cuáles son las dimensiones del dataset cargado (número de
@@ -601,8 +613,30 @@ df$Bytes[is.na(df$Bytes)] &lt;- 0</code></pre>
 </div>
 <div id="pregunta-2" class="section level3">
 <h3>Pregunta 2</h3>
-<p><strong>¿Cuáles son las dimensiones del dataset cargado (número de
-filas y columnas)?</strong></p>
+<p><strong>De las diferentes IPs de origen accediendo al servidor,
+¿cuantas pertenecen a una IP claramente educativa (que contenga
+“.edu”)?</strong></p>
+<pre class="r"><code># Buscamos las filas donde la columna IP (V1) contiene &quot;.edu&quot;
+ips_educativas &lt;- grep(&quot;.edu&quot;, df$IP, value = TRUE)
+
+# Contamos cuántas hay en total
+total_educativas &lt;- length(ips_educativas)
+
+# Si quieres saber cuántas IPs ÚNICAS educativas hay (opcional pero recomendado)
+ips_unicas_edu &lt;- length(unique(ips_educativas))</code></pre>
+<p>Explicación de los comandos: grep(“.edu”, df$IP): Busca la cadena de
+texto “.edu” dentro de la primera columna de tu tabla.</p>
+<p>length(…): Cuenta cuántos elementos se encontraron en la búsqueda
+anterior.</p>
+<p>unique(…): Se usa por si una misma universidad hizo muchas
+peticiones; esto te permite saber cuántas “entidades” educativas
+diferentes hay, aunque la pregunta suele referirse al total de
+registros.</p>
+<p>Al analizar el dataset, se identificó que existen
+<strong>6539</strong> peticiones provenientes de dominios educativos
+(que contienen “.edu”). Si filtramos por direcciones únicas, encontramos
+que hay <strong>376</strong> instituciones educativas distintas
+accediendo al servidor.</p>
 </div>
 </div>
 </div>
