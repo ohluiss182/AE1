@@ -1,14 +1,55 @@
 ---
 title: "Actividad Evaluable 1: Seminario Internacional en Herramientas y Técnicas de Detección de Ciberamenazas"
-autor"Grupo CJLR"
-fecha: "18 de marzo de 2026"
+author: "Grupo CJLR"
+date: "18 de marzo de 2026"
 output: 
   html_document:
     toc: true
     toc_float: true
     theme: united
 ---
+
+# 1. Data Science
+
+### Pregunta 1: Clasificación de preguntas
+
+**1. Ajuste de precios de peajes (conteo y tipo más frecuente, países con más vehículos)** \* **Clasificación:** Descriptiva. \* **Razonamiento:** Se busca resumir y organizar datos históricos existentes (conteos, frecuencias y máximos) para entender el estado actual o pasado sin realizar inferencias.
+
+**2. Preferencias de género literario según usuarios y rango de edad** \* **Clasificación:** Exploratoria. \* **Razonamiento:** El objetivo es hallar relaciones, tendencias o patrones ocultos entre variables (edad, género y preferencias) para formular hipótesis sobre el comportamiento del lector.
+
+**3. Determinación de problemas futuros con una red de telefonía y comparación con otras** \* **Clasificación:** Predictiva. \* **Razonamiento:** Utiliza datos históricos y comparativos para modelar comportamientos y anticipar eventos (fallos de red) que aún no han ocurrido.
+
+**4. Asignación de un usuario al azar a grupos según su historial** \* **Clasificación:** Inferencial / Causal. \* **Razonamiento:** Se utiliza el historial para determinar la probabilidad de pertenencia a un grupo o para realizar experimentos (como un A/B testing) que midan el impacto de dicha asignación.
+
+------------------------------------------------------------------------
+
+### Pregunta 2: Escenario de Ciberseguridad
+
+**Análisis y Resolución mediante Data Science:**
+
+-   **Obtención de datos:** Los registros TCP se extraen de fuentes de red y de host. Principalmente de archivos **PCAP** capturados mediante `tcpdump` o Wireshark, y de logs de dispositivos perimetrales como **Firewalls, IDS/IPS** (Suricata/Snort) y SIEM. También se pueden obtener flujos de red consolidados (NetFlow/IPFIX).
+
+-   **Tratamiento de datos:**
+
+    -   **Limpieza:** Eliminación de duplicados y gestión de valores nulos en los flags TCP.
+    -   **Filtrado:** Segmentar por rangos de IP sospechosas, puertos críticos (80, 443, 22) y periodos de tiempo específicos.
+    -   **Normalización:** Convertir marcas de tiempo (timestamps) a un formato único y estructurar datos no organizados en DataFrames para facilitar el análisis estadístico.
+
+-   **Preguntas a resolver:**
+
+    1.  ¿Existe un volumen inusual de intentos de conexión fallidos (SYN sin ACK) que indique un escaneo de puertos o DoS?
+    2.  ¿Hay patrones de transferencia de datos hacia IPs externas no autorizadas (exfiltración)?
+    3.  ¿Cuál es la distribución de tráfico por protocolo y si existen anomalías en el tamaño de los paquetes?
+
+-   **Datos y gráficos a obtener:**
+
+    -   **Histogramas de frecuencia:** Para detectar picos de tráfico en horas no laborables.
+    -   **Gráficos de dispersión (Scatter Plots):** Para identificar *outliers* en el volumen de bytes transferidos por sesión.
+    -   **Mapas de calor (Heatmaps):** Para visualizar la densidad de conexiones entre IPs de origen y destino.
+    -   **Métricas:** Tasa de error de conexión, latencia media y ratio de paquetes perdidos.
+
+-   **Comunicación:** Se presentaría un **Executive Dashboard** con semáforos de riesgo (Rojo/Amarillo/Verde). A la dirección se le entrega un resumen de impacto de negocio (posible pérdida de datos o indisponibilidad), mientras que a los equipos técnicos se les proporciona el detalle de los indicadores de compromiso (IoC) y las recomendaciones de bloqueo inmediatas en las reglas del Firewall.
+
 ## Import Dataset
 
-epa_http <- read_table("./epa-http.csv",
- col_names = c("Origin","Timestamp","Method","URI","Protocol","Status","Bytes"))
+epa_http \<- read_table("./epa-http.csv", col_names = c("Origin","Timestamp","Method","URI","Protocol","Status","Bytes"))
