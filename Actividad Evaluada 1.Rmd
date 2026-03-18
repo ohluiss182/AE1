@@ -144,11 +144,26 @@ total_educativas <- length(ips_educativas)
 ips_unicas_edu <- length(unique(ips_educativas))
 ```
 
-Explicación de los comandos:
-grep(".edu", df$IP): Busca la cadena de texto ".edu" dentro de la primera columna de tu tabla.
+Explicación de los comandos: grep(".edu", df\$IP): Busca la cadena de texto ".edu" dentro de la primera columna de tu tabla.
 
 length(...): Cuenta cuántos elementos se encontraron en la búsqueda anterior.
 
 unique(...): Se usa por si una misma universidad hizo muchas peticiones; esto te permite saber cuántas "entidades" educativas diferentes hay, aunque la pregunta suele referirse al total de registros.
 
 Al analizar el dataset, se identificó que existen **`r total_educativas`** peticiones provenientes de dominios educativos (que contienen ".edu"). Si filtramos por direcciones únicas, encontramos que hay **`r ips_unicas_edu`** instituciones educativas distintas accediendo al servidor.
+
+### Pregunta 3
+
+**De todas las peticiones recibidas por el servidor ¿Cuál es la hora en la que hay mayor volumen de peticiones HTTP de tipo "GET"?**
+
+### Pregunta 4
+
+**De las peticiones hechas por instituciones educativas (.edu), ¿Cuántos bytes en total se han transmitido, en peticiones de descarga de ficheros de texto ".txt"?**
+
+### Pregunta 5
+
+**De Si separamos la petición en 3 partes (Tipo, Url, Protocolo), usando str_split y el separador " " (espacio), ¿Cúantas peticiones buscan directamente la URL = "/"?**
+
+### Pregunta 6
+
+**Aprovechando que hemos separado la petición en 3 partes (Tipo, URL, Protocolo) ¿Cuantas peticiones NO tienen como protocolo "HTTP/0.2"?**
