@@ -31,7 +31,7 @@ library(readr)
 
 **3. Determinación de problemas futuros con una red de telefonía y comparación con otras** **Clasificación:** Predictiva.
 
-**Razonamiento:** Utiliza datos históricos y comparativos para modelar comportamientos y anticipar eventos (fallos de red) que aún no han ocurrido.
+**Razonamiento:** Es predictiva porque busca anticipar comportamientos futuros a partir de datos historicos. Por ejemplo, si se observa que el 75% de las peticiones provenientes de una red "X" generan errores, mientras que en otras redes la tasa es menor al 10%, se puede inferir que las futuras solicitudes de la red "x" tienen alta probalidad de fallar, mientras que en las demás el riesgo es bajo.
 
 **4. Asignación de un usuario al azar a grupos según su historial**
 
