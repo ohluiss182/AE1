@@ -22,7 +22,6 @@ library(readr)
 
 **Clasificación:** Descriptiva. **Razonamiento:** Es descriptiva porque se mi limita a resumir y cuantificar la información disponible del registro, como cantidades, frecuencias y categorìas màs comunes.
 
-
 **2. Preferencias de género literario según usuarios y rango de edad**
 
 **Clasificación:** Exploratoria.
@@ -120,6 +119,8 @@ En esta etapa se procede a la recopilación de los datos necesarios para llevar 
     -   **Gráficos de dispersión (Scatter Plots):** Para identificar *outliers* en el volumen de bytes transferidos por sesión.
     -   **Mapas de calor (Heatmaps):** Para visualizar la densidad de conexiones entre IPs de origen y destino.
     -   **Métricas:** Tasa de error de conexión, latencia media y ratio de paquetes perdidos.
+
+# 2. Introducción a R
 
 ## Import Dataset
 
