@@ -25,21 +25,93 @@ output:
 
 ### Pregunta 2: Escenario de Ciberseguridad
 
-**Análisis y Resolución mediante Data Science:**
+**Etapa: ASK**
 
--   **Obtención de datos:** Los registros TCP se extraen de fuentes de red y de host. Principalmente de archivos **PCAP** capturados mediante `tcpdump` o Wireshark, y de logs de dispositivos perimetrales como **Firewalls, IDS/IPS** (Suricata/Snort) y SIEM. También se pueden obtener flujos de red consolidados (NetFlow/IPFIX).
+-   ¿Qué servicios web están recibiendo conexiones?
 
--   **Tratamiento de datos:**
+    -   Se plantea esta pregunta con el objetivo de identificar qué servicios se están exponiendo.
 
-    -   **Limpieza:** Eliminación de duplicados y gestión de valores nulos en los flags TCP.
-    -   **Filtrado:** Segmentar por rangos de IP sospechosas, puertos críticos (80, 443, 22) y periodos de tiempo específicos.
-    -   **Normalización:** Convertir marcas de tiempo (timestamps) a un formato único y estructurar datos no organizados en DataFrames para facilitar el análisis estadístico.
+-   ¿Qué orígenes se repiten y son de clientes conocidos?
 
--   **Preguntas a resolver:**
+    -   Se plantea esta pregunta con el objetivo de identificar posibles falsos positivos.
 
-    1.  ¿Existe un volumen inusual de intentos de conexión fallidos (SYN sin ACK) que indique un escaneo de puertos o DoS?
-    2.  ¿Hay patrones de transferencia de datos hacia IPs externas no autorizadas (exfiltración)?
-    3.  ¿Cuál es la distribución de tráfico por protocolo y si existen anomalías en el tamaño de los paquetes?
+-   ¿Qué comportamiento diferencia a servicios autorizados vs. no autorizados?
+
+    -   Se plantea esta pregunta con el objetivo de saber identificar los servicios no autorizados.
+
+**Etapa: GET**
+
+-   Fuentes de datos
+
+    -   Logs de conexiones TCP:
+
+        -   IP origen
+
+        -   IP destino
+
+        -   Puerto origen/destino
+
+        -   Timestamp
+
+        -   Duración de la conexión
+
+    -   Inventario de servicios autorizados (lista blanca)
+
+    -   Información de red:
+
+        -   IPs internas vs externas
+
+        -   Usuarios asociados a cada máquina
+
+**Etapa: EXPLORE**
+
+-   **Limpieza y transformación:**
+
+    -   Filtrar tráfico interno vs externo
+
+    -   Eliminación de duplicados y gestión de valores nulos en los flags TCP
+
+    -   Normalizar timestamps.
+
+    -   Identificar conexiones entrantes vs salientes.
+
+    -   Agregar métricas por equipo:
+
+        -   Nº de conexiones recibidas
+
+        -   Nº de IPs únicas conectadas
+
+        -   Frecuencia temporal
+
+-   **Análisis:**
+
+    -   Identificar comportamiento tipo servidor.
+
+    -   Comparación con línea base.
+
+    -   Buscar actividad dentro y fuera de horario laboral.
+
+    -   Segmentar por rangos de IP sospechosas, puertos críticos (80, 443, 22) y periodos de tiempo específicos.
+
+**Etapa: MODEL**
+
+-   **Detección de anomalías**
+
+    -   Detección de equipos con muchas conexiones entrantes.
+
+    -   Detección de equipos con muchas IPs únicas.
+
+-   **Clasificación**
+
+    -   Entrenar modelo supervisado con:
+
+        -   Equipos con servicios autorizados
+
+        -   Equipos normales
+
+**Etapa: COMMUNICATE AND VISUALIZE**
+
+-   **Comunicación:** Se presentaría un Executive Dashboard con semáforos de riesgo (Rojo/Amarillo/Verde). A la dirección se le entrega un resumen de impacto de negocio (posible pérdida de datos o indisponibilidad), mientras que a los equipos técnicos se les proporciona el detalle de los indicadores de compromiso (IoC) y las recomendaciones de bloqueo inmediatas en las reglas del Firewall.
 
 -   **Datos y gráficos a obtener:**
 
@@ -48,8 +120,10 @@ output:
     -   **Mapas de calor (Heatmaps):** Para visualizar la densidad de conexiones entre IPs de origen y destino.
     -   **Métricas:** Tasa de error de conexión, latencia media y ratio de paquetes perdidos.
 
--   **Comunicación:** Se presentaría un **Executive Dashboard** con semáforos de riesgo (Rojo/Amarillo/Verde). A la dirección se le entrega un resumen de impacto de negocio (posible pérdida de datos o indisponibilidad), mientras que a los equipos técnicos se les proporciona el detalle de los indicadores de compromiso (IoC) y las recomendaciones de bloqueo inmediatas en las reglas del Firewall.
-
 ## Import Dataset
 
-epa_http \<- read_table("./epa-http.csv", col_names = c("Origin","Timestamp","Method","URI","Protocol","Status","Bytes"))
+library(readr) df \<- read_table("./epa-http.csv", col_names = c("Origin","Timestamp","Method","URI","Protocol","Status","Bytes"))
+
+library(stringr) df$tiempo_raw <- str_extract(df$Timestamp, "\\[.\*?\\]") df$tiempo_raw <- str_remove_all(df$tiempo_raw, "\\[\|\\]")
+
+library(tidyr) df \<- df %\>% separate(tiempo_raw, into = c("dia", "hora", "minuto", "segundo"), sep = ":")
