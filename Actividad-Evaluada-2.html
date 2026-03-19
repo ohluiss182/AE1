@@ -652,18 +652,12 @@ kable(df_verificacion[, c(&quot;URL&quot;, &quot;Status_HTTP&quot;)], caption = 
 </tr>
 </tbody>
 </table>
-<p>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD Justificación Técnica y Decisiones
-de Arquitectura Eficiencia mediante Peticiones HEAD: Se optó por el
-método HEAD en lugar de GET. Esta decisión técnica permite recuperar
-exclusivamente la cabecera de respuesta (metadatos y códigos de estado),
-optimizando el tiempo de ejecución y reduciendo el consumo de ancho de
-banda, una práctica estándar en el desarrollo de crawlers profesionales.
-======= Justificación Técnica y Decisiones Tomadas Uso de HEAD: A
-diferencia de GET, el método HEAD solicita únicamente las líneas de
-estado y la sección de cabecera. Es la técnica estándar para bots de
-rastreo (crawlers) que solo necesitan verificar la existencia de un
-recurso. &gt;&gt;&gt;&gt;&gt;&gt;&gt;
-fcae3444dc78793084b7267b4049b6a376d86f38</p>
+<p>Justificación Técnica y Decisiones de Arquitectura Eficiencia
+mediante Peticiones HEAD: Se optó por el método HEAD en lugar de GET.
+Esta decisión técnica permite recuperar exclusivamente la cabecera de
+respuesta (metadatos y códigos de estado), optimizando el tiempo de
+ejecución y reduciendo el consumo de ancho de banda, una práctica
+estándar en el desarrollo de crawlers profesionales.</p>
 <p>Normalización de Rutas Relativas: Se implementó un motor de
 reconstrucción de URLs para convertir rutas locales (ej. /wiki/…) en
 URLs absolutas funcionales. Este proceso garantiza que las peticiones
