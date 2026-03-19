@@ -285,6 +285,20 @@ Justificación: La tarta ofrece una visión ejecutiva e inmediata de la salud de
 
 ### 4. Infografía Final
 
+Para el análisis utilizamos tres gráficos para entender cómo funciona la página web y en qué estado se encuentra.
+
+-   Primera Grafica:
+
+    Para este esenario utilizamos el histograma que muestra cuántas veces aparecen los enlaces, diferenciando entre los que son internos (relativos) y los externos o completos (absolutos). Esto ayuda a ver cómo se organiza la navegación dentro del sitio.
+
+-   Segunda Grafica:
+
+    Para este esenario utilizamos el gráfico de barras que nos ayuda a comparar la cantidad total de enlaces que llevan al propio sitio (MediaWiki) frente a los que van a páginas externas. Así se puede ver si la web depende mucho de otros sitios o no.
+
+-   Tercera Grafica:
+
+    Para este escenario utilizamos el gráfico de tarta, ya que nos muestra el porcentaje de enlaces que funcionan correctamente y los que tienen errores. Esto permite entender rápidamente si la página está en buen estado o si hay muchos enlaces rotos.
+
 Descripción: Integración de las visualizaciones anteriores en una sola figura compuesta directamente desde el entorno de R.
 
 ```{r final}
@@ -292,4 +306,4 @@ Descripción: Integración de las visualizaciones anteriores en una sola figura 
 grid.arrange(p1, p2, p3, layout_matrix = rbind(c(1, 2), c(3, 3)))
 ```
 
-Análisis Final: La composición permite realizar un diagnóstico integral de la plataforma. La integración de los tres gráficos en una sola imagen facilita la interpretación técnica y gerencial de los activos digitales del portal, cumpliendo con el requisito de generar la infografía mediante código reproducible en R.
+La composición permite realizar un diagnóstico integral de la plataforma. La integración de los tres gráficos en una sola imagen facilita la interpretación técnica y gerencial de los activos digitales del portal, cumpliendo con el requisito de generar la infografía mediante código reproducible en R.
