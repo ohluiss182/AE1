@@ -11,6 +11,7 @@ library(XML)
 library(tidyverse)
 library(gridExtra)
 library(knitr)
+library(DT)
 ```
 
 ```{r setup, include=FALSE}
@@ -24,7 +25,9 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
 ### 1. Descargar la página web de la URL indicada, y almacenarlo en un formato de R apto para ser tratado.
 
-**Enunciado:** El primer paso para realizar tareas de crawling y scraping es poder descargar los datos de la web. Para esto usaremos la capacidad de R y de sus librerías (httr y XML) para descargar webs y almacenarlas en variables que podamos convertir en un formato fácil de analizar (p.e. de HTML a XML)
+**Enunciado:**
+
+El primer paso para realizar tareas de crawling y scraping es poder descargar los datos de la web. Para esto usaremos la capacidad de R y de sus librerías (httr y XML) para descargar webs y almacenarlas en variables que podamos convertir en un formato fácil de analizar (p.e. de HTML a XML)
 
 **Respuesta:**
 
@@ -37,7 +40,7 @@ respuesta <- GET(url_mediawiki)
 status_code(respuesta)
 ```
 
-Luego de asegurada la respuesta, usamos las funciones `content` y `htmlParse` para crear un árbol DOM (Document Object Model) que optimiza las búsquedas posteriores mediante `XPath` sin saturar el servidor con nuevas peticiones.
+Luego de asegurada la respuesta **`r status_code(respuesta)`**, usamos las funciones `content` y `htmlParse` para crear un árbol DOM (Document Object Model) que optimiza las búsquedas posteriores mediante `XPath` sin saturar el servidor con nuevas peticiones.
 
 ```{r parseo-datos}
 # Convertimos a formato XML para facilitar el análisis
@@ -49,44 +52,42 @@ Una vez almacenada la variable, podemos continuar con las demás actividades.
 
 ### 2. Analizar el contenido de la web, buscando el título de la página (que en HTML se etiqueta como “title”).
 
+**Enunciado:**
+
+En las cabeceras web encontramos información como el título, los ficheros de estilo visual, y meta-información como el nombre del autor de la página, una descripción de esta, el tipo de codificación de esta, o palabras clave que indican qué tipo de información contiene la página. Una vez descargada la página, y convertida a un formato analizable (como XML), buscaremos los elementos de tipo `“title”`. P.e. `“<title>Titulo de Página</title>”`.
+
+**Respuesta:**
+
+En la primera línea, `titulo_pagina <- xpathSApply(parsed_item, "//title", xmlValue)`, está extrayendo el título de la página web. Para ello, se utiliza `parsed_item`, que es el documento HTML previamente procesado y listo para ser analizado. La función `xpathSApply` busca dentro de ese documento todos los nodos que coinciden con la expresión `"//title"`, que indica que se debe encontrar la etiqueta `<title>` en cualquier parte del HTML. Una vez localizada, se aplica `xmlValue`, que se encarga de extraer el texto contenido dentro de esa etiqueta. El resultado final se guarda en la variable `titulo_pagina`.
+
 ```{r extraccion-limpieza}
-### 2. Extracción del Título
+### Extracción del Título
 titulo_pagina <- xpathSApply(parsed_item, "//title", xmlValue)
+
+```
+
+En la segunda línea, `n_caracteres <- nchar(titulo_pagina)`, realiza un análisis complementario del título obtenido. La función `nchar` sirve para contar el número de caracteres que tiene el texto almacenado en `titulo_pagina`. De esta forma, se obtiene la longitud del título de la página web, y el resultado se guarda en la variable `n_caracteres`.
+
+```{r extraccion-limpieza2}
 
 ### 2. Analisis Complementario
 n_caracteres <- nchar(titulo_pagina)
 
 ```
-Sintaxis:
 
-parsed_item: Sirve para buscar y sacar datos dentro del HTML.
-
-"//title": Busca la etiqueta title en cualquier parte del documento.
-
-xmlValue: Se usa para obtener texto que esta dentro dentro de una etiqueta.
-
-Resultados:
-
-
-Titulo extraido: r titulo_pagina
-Longitud: r n_caracteres caracteres
-
-**Justificación:**
-
-El titulo es el metadato principal de identidad. Se accede a èl mdiante XPath. La validaciòn de su longitud asegura que el contenido sea legible y no presenta anomalìas estructurales.
-
+De lo anterior,se ha extraído el título **`r titulo_pagina`**, cuya longitud es de **`r n_caracteres`** caracteres. La validación de su longitud asegura que el contenido sea legible y no presenta anomalìas estructurales.
 
 ### 3. Analizar el contenido de la web, buscando todos los enlaces (que en HTML se etiquetan como “a”), buscando el texto del enlace, así como la URL.
 
 **Enunciado:**
 
-Una vez descargada la página y convertida a formato XML, debemos analizar su contenido para localzar todos los enlaces HTML. Los enlaces se representan mediante la etiqueta <a>, donde el texto visible está dentro de la etiqueta y la dirección del enlace se encuentra en el atributo href. Usaremos funciones de la librería XML para extraer tanto el texto del enlace como su URL, y organizaremos los resultados en un data frame siguiendo el principio de **Datos Elegantes**, donde cada fila representa una observación.
+Una vez descargada la página y convertida a formato XML, debemos analizar su contenido para localzar todos los enlaces HTML. Los enlaces se representan mediante la etiqueta `<a>`, donde el texto visible está dentro de la etiqueta y la dirección del enlace se encuentra en el atributo href. Usaremos funciones de la librería XML para extraer tanto el texto del enlace como su URL, y organizaremos los resultados en un data frame siguiendo el principio de **Datos Elegantes**, donde cada fila representa una observación.
 
 **Respuesta:**
 
-Primero, utilizamos la función xpathSApply() para buscar todos los nodos <a> dentro del documento HTML parseado, extrayendo por separado el texto visible del enlace y el atributo href, que contiene la URL.
+Primero, utilizamos la función `xpathSApply()` para buscar todos los nodos `<a>` dentro del documento HTML parseado, extrayendo por separado el texto visible del enlace y el atributo href, que contiene la URL.
 
-```{r analisis-status}
+```{r analisis-status1}
 ### 3. Extracción de información de hipervínculos
 # Extraemos el texto que el usuario ve (anchor text)
 textos_enlaces <- xpathSApply(parsed_item, "//a", xmlValue)
@@ -97,7 +98,7 @@ hrefs_enlaces <- xpathSApply(parsed_item, "//a", xmlGetAttr, "href")
 
 Luego consolidamos los resultamos en un **data frame**, donde cada fila corresponde a un enlace encontrado en la página.
 
-```{r analisis-status}
+```{r analisis-status2}
 
 # Consolidamos en un Data Frame inicial (Tidy Data)
 df_enlaces_raw <- data.frame(
@@ -108,25 +109,33 @@ df_enlaces_raw <- data.frame(
 
 ```
 
-Finalmente, mostramos los primeros registros para comprobar que la extracción se ha realizado correctamente.
+Finalmente, mostramos los primeros registros para comprobar que la extracción se ha realizado correctamente. Al extraer ambos atributos por separado y unirlos en un data frame, cumplimos con el principio de "Datos Elegantes", donde cada fila es una observación de un enlace encontrado en el HTML.
 
-```{r analisis-status}
+```{r analisis-status3}
 # Visualización de los primeros registros
 head(df_enlaces_raw)
 ```
 
-
-**Justificación:**
-
-Se utiliza XPath para localizar todos los nodos de tipo anclaje. Al extraer ambos atributos por separado y unirlos en un data frame, cumplimos con el principio de "Datos Elegantes", donde cada fila es una observación de un enlace encontrado en el HTML.
-
-
 ### 4. Generar una tabla con cada enlace encontrado, indicando el texto que acompaña el enlace, y el número de veces que aparece un enlace con ese mismo objetivo.
 
-Objetivo: Diferenciar enlaces de MediaWiki versus el resto y validar su estado.
+**Enunciado:**
 
-```{r diferenciar}
-### 4. Consolidación y conteo de objetivos
+En este paso nos interesa reunir los datos obtenidos en el anterior paso. Tendremos que comprobar, para cada enlace, cuantas veces aparece.
+
+**Respuesta:**
+
+Para poder realizar esta actividad, es necesario primero crear un data frame `df_frecuencias`, el cual consiste en una copia de `df_enlaces_raw` creado anteriormente, en el que se ha ejecutado lo siguiente:
+
+-   Filtrado de NA, para eliminar enlaces nulos.
+
+-   Agrupación por enlace.
+
+-   Sumarización y agregado por texto (para mantener una referencia legible del enlace).
+
+-   Ordenar frecuencia de forma descendente.
+
+```{r frecuencia}
+### Consolidación y conteo de enlaces
 df_frecuencias <- df_enlaces_raw %>%
   filter(!is.na(URL)) %>%  # Eliminación de enlaces nulos
   group_by(URL) %>%
@@ -135,20 +144,25 @@ df_frecuencias <- df_enlaces_raw %>%
     Frecuencia = n()               # Conteo de repeticiones por URL única
   ) %>%
   arrange(desc(Frecuencia))
-
-# Presentación de la tabla de resultados
-kable(head(df_frecuencias, 10), 
-      caption = "Top 10 enlaces por frecuencia de aparición",
-      col.names = c("URL de Destino", "Texto del Enlace", "Número de Apariciones"))
 ```
 
-Justificación: En este paso se agrupan los datos por el campo URL. Esto permite identificar qué enlaces son estructurales (como los de navegación que aparecen en todas las secciones) y cuáles son específicos del contenido. Se utiliza first(Texto) para mantener una referencia legible del enlace en la tabla final.
+Finalmente, se usa la función `datatable` para mostrar la tabla de frecuencias, donde la URL más encontrada es **`r df_frecuencias$URL[which.max(df_frecuencias$Frecuencia)]`** apareciendo **`r df_frecuencias$Frecuencia[which.max(df_frecuencias$Frecuencia)]`** veces.
+
+```{r tabla_frecuencia}
+### Presentación de la tabla de frecuencias
+datatable(df_frecuencias, colnames = c("URL", "Texto del enlace", "Frecuencia"))
+```
 
 ### 5. Para cada enlace, seguirlo e indicar si está activo (podemos usar el código de status HTTP al hacer una petición a esa URL).
 
+**Enunciado:**
+
+En este paso podemos usar la función HEAD de la librería “httr”, que en vez de descargarse la página como haría GET, solo consultamos los atributos de la página o fichero destino.
+
+**Respuesta:**
+
 Tras la extracción y consolidación de los activos digitales, se procedió a validar la integridad operativa de los recursos. Este paso es crítico en la detección de ciberamenazas y mantenimiento de infraestructura, ya que permite identificar enlaces rotos, redirecciones sospechosas o servicios no disponibles que podrían comprometer la experiencia del usuario o la seguridad del sitio.
 
-Protocolo de Validación Técnica
 Dada la densidad de enlaces identificados, se implementó un algoritmo de muestreo aleatorio asistido por técnicas de programación defensiva. Esto asegura una evaluación estadística representativa sin incurrir en una sobrecarga de peticiones al servidor destino.
 
 ```{r verificacion-status}
@@ -174,10 +188,7 @@ df_verificacion <- df_frecuencias %>%
 kable(df_verificacion[, c("URL", "Status_HTTP")], caption = "Muestra de verificación de disponibilidad")
 ```
 
-Justificación Técnica y Decisiones de Arquitectura
-Eficiencia mediante Peticiones HEAD: Se optó por el método HEAD en lugar de GET. Esta decisión técnica permite recuperar exclusivamente la cabecera de respuesta (metadatos y códigos de estado), optimizando el tiempo de ejecución y reduciendo el consumo de ancho de banda, una práctica estándar en el desarrollo de crawlers profesionales.
-
-Normalización de Rutas Relativas: Se implementó un motor de reconstrucción de URLs para convertir rutas locales (ej. /wiki/...) en URLs absolutas funcionales. Este proceso garantiza que las peticiones internas de la plataforma MediaWiki sean procesadas correctamente por el protocolo HTTP.
+Se optó por el método HEAD en lugar de GET. Esta decisión permite recuperar exclusivamente la cabecera de respuesta (metadatos y códigos de estado), optimizando el tiempo de ejecución y reduciendo el consumo de ancho de banda, una práctica estándar en el desarrollo de crawlers profesionales.
 
 Gestión de Excepciones y Resiliencia: El uso de bloques tryCatch permite que el análisis sea resiliente ante fallos de red, timeouts o URLs malformadas. Los errores se capturan como valores NA, cumpliendo con las directrices de manejo de datos incompletos sugeridas en el protocolo de la actividad.
 
