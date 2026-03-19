@@ -12,6 +12,7 @@ library(tidyverse)
 library(gridExtra)
 library(knitr)
 library(DT)
+library(stringr)
 ```
 
 ```{r setup, include=FALSE}
@@ -138,10 +139,10 @@ Para poder realizar esta actividad, es necesario primero crear un data frame `df
 ### Consolidación y conteo de enlaces
 df_frecuencias <- df_enlaces_raw %>%
   filter(!is.na(URL)) %>%  # Eliminación de enlaces nulos
-  group_by(URL) %>%
+  group_by(Texto,URL) %>%
   summarise(
-    Texto_Asociado = first(Texto), # Tomamos el primer texto descriptivo encontrado
-    Frecuencia = n()               # Conteo de repeticiones por URL única
+    Frecuencia = n(), # Conteo de repeticiones por URL única
+    .groups = "drop"
   ) %>%
   arrange(desc(Frecuencia))
 ```
@@ -161,37 +162,63 @@ En este paso podemos usar la función HEAD de la librería “httr”, que en 
 
 **Respuesta:**
 
-Tras la extracción y consolidación de los activos digitales, se procedió a validar la integridad operativa de los recursos. Este paso es crítico en la detección de ciberamenazas y mantenimiento de infraestructura, ya que permite identificar enlaces rotos, redirecciones sospechosas o servicios no disponibles que podrían comprometer la experiencia del usuario o la seguridad del sitio.
-
 La validación se ejecuta sobre el conjunto de URLs únicas (`df_frecuencias`). Al eliminar la redundancia de enlaces repetidos, se reduce drásticamente el número de peticiones necesarias, incrementando la eficiencia del proceso de auditoría.
 
-Se optó por el método HEAD en lugar de GET. Esta decisión permite recuperar exclusivamente la cabecera de respuesta (metadatos y códigos de estado), optimizando el tiempo de ejecución y reduciendo el consumo de ancho de banda. Así mismo, `tryCatch` permite que el análisis sea resiliente ante fallos de red, timeouts o URLs malformadas. Los errores se capturan como valores NA.
+Primero, se crea la función `construir_url`, la cual permite estructurar los enlaces de la forma requerida. Luego, se crea otra función `verificar_status` para obtener el estado del enlace. Así mismo, `tryCatch` permite que el análisis sea resiliente ante fallos de red, timeouts o URLs malformadas. Los errores se capturan como valores NA.
 
 ```{r verificacion-status}
+construir_url <- function(url, base = "https://www.mediawiki.org") {
+  if (is.na(url) || url == "") return(NA)
+  if (str_starts(url, "#")) {
+    # Anchor → misma página
+    return(base)
+  }
+  if (str_starts(url, "//")) {
+    return(paste0("https:", url))
+  }
+  if (str_starts(url, "/")) {
+    return(paste0(base, url))
+  }
+  if (str_starts(url, "http")) {
+    return(url)
+  }
+  return(NA)
+}
+
 # Función de comprobación de salud de la URL
-verificar_status <- function(url_input) {
-  # Reconstrucción si la URL es relativa
-  url_final <- if(str_starts(url_input, "/")) paste0("[https://www.mediawiki.org](https://www.mediawiki.org)", url_input) else url_input
+verificar_status <- function(url) {
+  if (is.na(url)) return(NA)
   
   tryCatch({
-    res <- HEAD(url_final, timeout(2))
+    res <- HEAD(url, timeout(2), config(followlocation = FALSE))
     return(status_code(res))
-  }, error = function(e) return(NA))
+  }, error = function(e) {
+    return(NA)
+  })
 }
 ```
 
-Dada la densidad de enlaces identificados, se implementó un algoritmo de muestreo aleatorio. Esto asegura una evaluación estadística representativa sin incurrir en una sobrecarga de peticiones al servidor destino.
+Ahora, se usarán las 2 funciones creadas para estructurar el data frame `df_verificacion` y mostrarlo mediante `datatable`.
 
 ```{r verificacion-status2}
 # Validación sobre una muestra para eficiencia del reporte
 set.seed(123)
 df_verificacion <- df_frecuencias %>%
-  sample_n(20) %>%
-  rowwise() %>%
-  mutate(Status_HTTP = verificar_status(URL)) %>%
-  ungroup()
+  mutate(
+    URL_final = sapply(URL, construir_url),
+    Status_HTTP = sapply(URL_final, function(u) {
+      Sys.sleep(1)
+      verificar_status(u)
+    }),
+    Estado = case_when(
+      is.na(Status_HTTP) ~ "Error",
+      Status_HTTP >= 200 & Status_HTTP < 300 ~ "Activo",
+      Status_HTTP >= 300 & Status_HTTP < 400 ~ "Redirección",
+      Status_HTTP >= 400 ~ "Caído"
+    )
+  )
 
-kable(df_verificacion[, c("URL", "Status_HTTP")], caption = "Muestra de verificación de disponibilidad")
+datatable(df_verificacion)
 ```
 
 ## Pregunta 2
@@ -261,6 +288,12 @@ p2
 ```
 
 ### 3. Un gráfico de tarta (pie chart) indicando los porcentajes de Status de nuestro análisis.
+
+Enunciado:
+
+Por ejemplo, si hay 6 enlaces con status “200” y 4 enlaces con status “404”, la tarta mostrará un 60% con la etiqueta “200” y un 40% con la etiqueta “404”. Este gráfico lo uniremos a los anteriores. El objetivo final es obtener una imagen que recopile los gráficos generados.
+
+Resultado:
 
 Descripción: Representación porcentual de la disponibilidad de los recursos basada en el análisis de códigos de estado HTTP.
 
