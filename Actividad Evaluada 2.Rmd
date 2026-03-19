@@ -216,7 +216,7 @@ p1 <- ggplot(df_graficos, aes(x = Frecuencia, fill = Tipo)) +
   theme_minimal()
 ```
 
-Justificación: El histograma permite observar el comportamiento de la navegación en el portal. Técnicamente, se espera que las URLs relativas sean más numerosas pero de baja frecuencia (correspondientes a contenido específico), mientras que las absolutas suelen ser estructurales y presentar una mayor recurrencia..
+Justificación: El histograma permite observar el comportamiento de la navegación en el portal. Técnicamente, se espera que las URLs relativas sean más numerosas pero de baja frecuencia (correspondientes a contenido específico), mientras que las absolutas suelen ser estructurales y presentar una mayor recurrencia...
 
 ### 2. Un gráfico de barras indicando la suma de enlaces que apuntan a otros dominios o servicios (distinto a <https://www.mediawiki.org> en el caso de ejemplo) vs. la suma de los otros enlaces.
 
