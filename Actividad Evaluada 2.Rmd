@@ -57,6 +57,7 @@ titulo_pagina <- xpathSApply(parsed_item, "//title", xmlValue)
 n_caracteres <- nchar(titulo_pagina)
 
 ```
+Sintaxis:
 
 parsed_item: Sirve para buscar y sacar datos dentro del HTML.
 
@@ -64,10 +65,16 @@ parsed_item: Sirve para buscar y sacar datos dentro del HTML.
 
 xmlValue: Se usa para obtener texto que esta dentro dentro de una etiqueta.
 
+Resultados:
 
--   **Justificación:**
 
-    Se accede al nodo raíz de metadatos del documento. El título es una pieza clave de información para indexadores y bots de rastreo.
+Titulo extraido: r titulo_pagina
+Longitud: r n_caracteres caracteres
+
+**Justificación:**
+
+El titulo es el metadato principal de identidad. Se accede a èl mdiante XPath. La validaciòn de su longitud asegura que el contenido sea legible y no presenta anomalìas estructurales.
+
 
 ### 3. Analizar el contenido de la web, buscando todos los enlaces (que en HTML se etiquetan como “a”), buscando el texto del enlace, así como la URL.
 
