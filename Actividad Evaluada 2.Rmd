@@ -220,19 +220,34 @@ Justificación: El histograma permite observar el comportamiento de la navegaci�
 
 ### 2. Un gráfico de barras indicando la suma de enlaces que apuntan a otros dominios o servicios (distinto a <https://www.mediawiki.org> en el caso de ejemplo) vs. la suma de los otros enlaces.
 
-Descripción: Suma de enlaces que apuntan al dominio oficial de MediaWiki frente a dominios externos o servicios ajenos.
+**Enunciado:**
 
-```{r histograma-suma}
+Aquí queremos distinguir enlaces que apuntan a mediawiki versus el resto. Sabemos que las URLs relativas ya apuntan dentro, por lo tanto hay que analizar las URLs absolutas y comprobar que apunten a `https://www.mediawiki.org`.
+
+**Respuesta:**
+
+Ya que requieren la suma de enlaces que apuntan al dominio oficial de MediaWiki frente a dominios externos o servicios ajenos, primero se procede con la identificación de los mismos, partiendo del `df_graficos`, detectando la pertenencia.
+
+```{r histograma-suma1}
 # Identificación de pertenencia al dominio
 df_graficos <- df_graficos %>%
   mutate(Destino = ifelse(Tipo == "Relativa" | str_detect(URL, "mediawiki.org"), 
                           "MediaWiki", "Externo"))
 
+```
+
+Luego ello, generamos el resumen_barras, el cual tiene agrupado los Destino y se aplica el parámetro na.rm = TRUE para asegurar que los valores desconocidos no afecten el cómputo total de la infraestructura.
+
+```{r histograma-suma2}
 # Agregación de datos aplicando na.rm = TRUE
 resumen_barras <- df_graficos %>%
   group_by(Destino) %>%
   summarise(Total_Suma = sum(Frecuencia, na.rm = TRUE))
+```
 
+Este gráfico es fundamental para distinguir la dependencia de servicios externos frente al control del contenido propio.
+
+```{r histograma-suma3}
 # Generación del gráfico de barras
 p2 <- ggplot(resumen_barras, aes(x = Destino, y = Total_Suma, fill = Destino)) +
   geom_bar(stat = "identity", na.rm = TRUE) +
@@ -241,9 +256,9 @@ p2 <- ggplot(resumen_barras, aes(x = Destino, y = Total_Suma, fill = Destino)) +
        y = "Total Enlaces") +
   theme_minimal() +
   guides(fill = "none")
-```
 
-Justificación: En este cálculo se aplica estrictamente el parámetro na.rm = TRUE para asegurar que los valores desconocidos no afecten el cómputo total de la infraestructura. Este gráfico es fundamental para distinguir la dependencia de servicios externos frente al control del contenido propio.
+p2
+```
 
 ### 3. Un gráfico de tarta (pie chart) indicando los porcentajes de Status de nuestro análisis.
 
