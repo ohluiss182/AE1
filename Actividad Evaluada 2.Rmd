@@ -24,17 +24,28 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
 ### 1. Descargar la página web de la URL indicada, y almacenarlo en un formato de R apto para ser tratado.
 
+**Enunciado:** El primer paso para realizar tareas de crawling y scraping es poder descargar los datos de la web. Para esto usaremos la capacidad de R y de sus librerías (httr y XML) para descargar webs y almacenarlas en variables que podamos convertir en un formato fácil de analizar (p.e. de HTML a XML)
+
+**Respuesta:**
+
+Primero, usando la librería `httr`, gestionamos la petición (`GET`) y aseguramos la respuesta exitosa mediante la variable `respuesta`.
+
 ```{r descarga-datos}
 # Descarga de la página web
 url_mediawiki <- "https://www.mediawiki.org/wiki/MediaWiki"
 respuesta <- GET(url_mediawiki)
+status_code(respuesta)
+```
 
+Luego de asegurada la respuesta, usamos las funciones `content` y `htmlParse` para crear un árbol DOM (Document Object Model) que optimiza las búsquedas posteriores mediante `XPath` sin saturar el servidor con nuevas peticiones.
+
+```{r parseo-datos}
 # Convertimos a formato XML para facilitar el análisis
 contenido_html <- content(respuesta, as = "text")
 parsed_item <- htmlParse(contenido_html, asText = TRUE)
 ```
 
-Justificación: Se utiliza httr para gestionar la petición y asegurar un status_code exitoso. El uso de htmlParse permite crear un árbol DOM (Document Object Model) que optimiza las búsquedas posteriores mediante XPath sin saturar el servidor con nuevas peticiones.
+Una vez almacenada la variable, podemos continuar con las demás actividades.
 
 ### 2. Analizar el contenido de la web, buscando el título de la página (que en HTML se etiqueta como “title”).
 
@@ -108,7 +119,10 @@ Justificación: En este paso se agrupan los datos por el campo URL. Esto permite
 
 ### 5. Para cada enlace, seguirlo e indicar si está activo (podemos usar el código de status HTTP al hacer una petición a esa URL).
 
-En esta sección, comprobamos la disponibilidad de los enlaces mediante peticiones HTTP. Debido al volumen de datos, se recomienda realizar el análisis sobre una muestra o implementar un control de errores para evitar que el proceso se detenga ante una URL mal formada.
+Tras la extracción y consolidación de los activos digitales, se procedió a validar la integridad operativa de los recursos. Este paso es crítico en la detección de ciberamenazas y mantenimiento de infraestructura, ya que permite identificar enlaces rotos, redirecciones sospechosas o servicios no disponibles que podrían comprometer la experiencia del usuario o la seguridad del sitio.
+
+Protocolo de Validación Técnica
+Dada la densidad de enlaces identificados, se implementó un algoritmo de muestreo aleatorio asistido por técnicas de programación defensiva. Esto asegura una evaluación estadística representativa sin incurrir en una sobrecarga de peticiones al servidor destino.
 
 ```{r verificacion-status}
 # Función de comprobación de salud de la URL
@@ -133,13 +147,18 @@ df_verificacion <- df_frecuencias %>%
 kable(df_verificacion[, c("URL", "Status_HTTP")], caption = "Muestra de verificación de disponibilidad")
 ```
 
+<<<<<<< HEAD
 Justificación Técnica y Decisiones Tomadas Uso de HEAD: A diferencia de GET, el método HEAD solicita únicamente las líneas de estado y la sección de cabecera. Es la técnica estándar para bots de rastreo (crawlers) que solo necesitan verificar la existencia de un recurso.
+=======
+Justificación Técnica y Decisiones de Arquitectura
+Eficiencia mediante Peticiones HEAD: Se optó por el método HEAD en lugar de GET. Esta decisión técnica permite recuperar exclusivamente la cabecera de respuesta (metadatos y códigos de estado), optimizando el tiempo de ejecución y reduciendo el consumo de ancho de banda, una práctica estándar en el desarrollo de crawlers profesionales.
+>>>>>>> 040de883c7fb0d24a45a8f3e6a64f7f0b9d04843
 
-Manejo de URLs Relativas: Se implementó una lógica condicional para reconstruir las URLs que comienzan con /. Sin este paso, las peticiones a enlaces internos de MediaWiki fallarían por "URL mal formada".
+Normalización de Rutas Relativas: Se implementó un motor de reconstrucción de URLs para convertir rutas locales (ej. /wiki/...) en URLs absolutas funcionales. Este proceso garantiza que las peticiones internas de la plataforma MediaWiki sean procesadas correctamente por el protocolo HTTP.
 
-Control de Errores (tryCatch): La web es dinámica y algunos enlaces pueden estar mal construidos o el servidor puede no responder. El uso de tryCatch asegura que el script de R no se detenga y que estos casos se marquen como NA, cumpliendo con la recomendación del PDF de gestionar valores nulos.
+Gestión de Excepciones y Resiliencia: El uso de bloques tryCatch permite que el análisis sea resiliente ante fallos de red, timeouts o URLs malformadas. Los errores se capturan como valores NA, cumpliendo con las directrices de manejo de datos incompletos sugeridas en el protocolo de la actividad.
 
-Optimización: Se aplica la validación sobre df_frecuencias (enlaces únicos) en lugar de la lista total de enlaces. Esto evita realizar peticiones redundantes a una misma URL que aparece varias veces en la página.
+Optimización del Espacio Muestral: La validación se ejecuta sobre el conjunto de URLs únicas (df_frecuencias). Al eliminar la redundancia de enlaces repetidos, se reduce drásticamente el número de peticiones necesarias, incrementando la eficiencia del proceso de auditoría.
 
 ## Pregunta 2
 
