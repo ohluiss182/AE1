@@ -41,9 +41,22 @@ Justificación: Se utiliza httr para gestionar la petición y asegurar un status
 ```{r extraccion-limpieza}
 ### 2. Extracción del Título
 titulo_pagina <- xpathSApply(parsed_item, "//title", xmlValue)
+
+### 2. Analisis Complementario
+n_caracteres <- nchar(titulo_pagina)
+
 ```
 
-Justificación: Se accede al nodo raíz de metadatos del documento. El título es una pieza clave de información para indexadores y bots de rastreo.
+parsed_item: Sirve para buscar y sacar datos dentro del HTML.
+
+"//title": Busca la etiqueta title en cualquier parte del documento.
+
+xmlValue: Se usa para obtener texto que esta dentro dentro de una etiqueta.
+
+
+-   **Justificación:**
+
+    Se accede al nodo raíz de metadatos del documento. El título es una pieza clave de información para indexadores y bots de rastreo.
 
 ### 3. Analizar el contenido de la web, buscando todos los enlaces (que en HTML se etiquetan como “a”), buscando el texto del enlace, así como la URL.
 
@@ -66,7 +79,9 @@ df_enlaces_raw <- data.frame(
 head(df_enlaces_raw)
 ```
 
-Justificación: Se utiliza XPath para localizar todos los nodos de tipo anclaje. Al extraer ambos atributos por separado y unirlos en un data frame, cumplimos con el principio de "Datos Elegantes", donde cada fila es una observación de un enlace encontrado en el HTML.
+-   **Justificación:**
+
+Se utiliza XPath para localizar todos los nodos de tipo anclaje. Al extraer ambos atributos por separado y unirlos en un data frame, cumplimos con el principio de "Datos Elegantes", donde cada fila es una observación de un enlace encontrado en el HTML.
 
 ### 4. Generar una tabla con cada enlace encontrado, indicando el texto que acompaña el enlace, y el número de veces que aparece un enlace con ese mismo objetivo.
 
@@ -118,8 +133,7 @@ df_verificacion <- df_frecuencias %>%
 kable(df_verificacion[, c("URL", "Status_HTTP")], caption = "Muestra de verificación de disponibilidad")
 ```
 
-Justificación Técnica y Decisiones Tomadas
-Uso de HEAD: A diferencia de GET, el método HEAD solicita únicamente las líneas de estado y la sección de cabecera. Es la técnica estándar para bots de rastreo (crawlers) que solo necesitan verificar la existencia de un recurso.
+Justificación Técnica y Decisiones Tomadas Uso de HEAD: A diferencia de GET, el método HEAD solicita únicamente las líneas de estado y la sección de cabecera. Es la técnica estándar para bots de rastreo (crawlers) que solo necesitan verificar la existencia de un recurso.
 
 Manejo de URLs Relativas: Se implementó una lógica condicional para reconstruir las URLs que comienzan con /. Sin este paso, las peticiones a enlaces internos de MediaWiki fallarían por "URL mal formada".
 
@@ -131,6 +145,6 @@ Optimización: Se aplica la validación sobre df_frecuencias (enlaces únicos) e
 
 ### 1.Un histograma con la frecuencia de aparición de los enlaces, pero separado por URLs absolutas (con “http…”) y URLs relativas.
 
-### 2. Un gráfico de barras indicando la suma de enlaces que apuntan a otros dominios o servicios (distinto a https://www.mediawiki.org en el caso de ejemplo) vs. la suma de los otros enlaces.
+### 2. Un gráfico de barras indicando la suma de enlaces que apuntan a otros dominios o servicios (distinto a <https://www.mediawiki.org> en el caso de ejemplo) vs. la suma de los otros enlaces.
 
 ### 3. Un gráfico de tarta (pie chart) indicando los porcentajes de Status de nuestro análisis.
