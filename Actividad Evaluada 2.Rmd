@@ -21,12 +21,12 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
 
 ```{r caché, include=FALSE}
-uso_memoria <- F
+uso_memoria <- TRUE
 ```
 
 
 ```{r load, include=FALSE, eval=uso_memoria}
-#load("~/AE1/Entorno.RData")
+load("~/AE1/Entorno.RData")
 ```
 
 # 1. Datos Elegantes + Análisis de Datos con Web Scrapping
