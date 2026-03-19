@@ -222,7 +222,7 @@ Justificación: El histograma permite observar el comportamiento de la navegaci�
 
 **Enunciado:**
 
-Aquí queremos distinguir enlaces que apuntan a mediawiki versus el resto. Sabemos que las URLs relativas ya apuntan dentro, por lo tanto hay que analizar las URLs absolutas y comprobar que apunten a `https://www.mediawiki.org`.
+Aquí quere hmos distinguir enlaces que apuntan a mediawiki versus el resto. Sabemos que las URLs relativas ya apuntan dentro, por lo tanto hay que analizar las URLs absolutas y comprobar que apunten a `https://www.mediawiki.org`.
 
 **Respuesta:**
 
