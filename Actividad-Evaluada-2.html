@@ -360,7 +360,8 @@ Ciberamenazas</h1>
 
 <pre class="r"><code>library(httr)
 library(XML)
-library(tidyverse)</code></pre>
+library(tidyverse)
+library(gridExtra)</code></pre>
 <div id="datos-elegantes-análisis-de-datos-con-web-scrapping" class="section level1">
 <h1>1. Datos Elegantes + Análisis de Datos con Web Scrapping</h1>
 <div id="pregunta-1" class="section level2">
@@ -380,15 +381,100 @@ print(status_code(respuesta))</code></pre>
 <pre class="r"><code># Extraer contenido y parsear como indica el PDF
 contenido_html &lt;- content(respuesta, as = &quot;text&quot;)
 parsed_item &lt;- htmlParse(contenido_html, asText = TRUE)</code></pre>
+<p>Justificación y Detalles Técnicos</p>
+<p>Uso de httr: Se utiliza la función GET() para realizar la petición
+HTTP. Esta librería es fundamental para gestionar las respuestas del
+servidor y asegurar que la descarga se ha realizado correctamente antes
+de procesar los datos.</p>
+<p>Conversión a XML: El contenido crudo se procesa con htmlParse. Esto
+permite que la variable parsed_item almacene el DOM (Document Object
+Model) de la página, facilitando la búsqueda de nodos específicos (como
+enlaces o tablas) mediante rutas XPath en los pasos siguientes.</p>
+<p>Almacenamiento en Variables: Siguiendo las directrices del PDF, el
+contenido no se procesa directamente al vuelo, sino que se guarda en una
+variable estructurada, lo que garantiza que podamos acceder a los datos
+de la web de forma repetida sin necesidad de realizar nuevas peticiones
+al servidor.</p>
 </div>
 <div id="analizar-el-contenido-de-la-web-buscando-el-título-de-la-página-que-en-html-se-etiqueta-como-title." class="section level3">
 <h3>2. Analizar el contenido de la web, buscando el título de la página
 (que en HTML se etiqueta como “title”).</h3>
+<pre class="r"><code># 1. Extracción de todos los enlaces (nodos &lt;a&gt; y atributo &#39;href&#39;)
+# Usamos xpathSApply sobre el objeto parseado en la Pregunta 1
+enlaces_raw &lt;- xpathSApply(parsed_item, &quot;//a&quot;, xmlGetAttr, &quot;href&quot;)
+
+# 2. Creación del Data Frame inicial
+df_enlaces &lt;- data.frame(url_original = enlaces_raw, stringsAsFactors = FALSE)
+
+# 3. Limpieza y Clasificación (Tidy Data)
+# Aplicamos filtros para eliminar NAs y clasificar tipos
+df_tidy &lt;- df_enlaces %&gt;%
+  filter(!is.na(url_original)) %&gt;% # Eliminamos valores nulos
+  mutate(
+    Tipo = case_when(
+      str_starts(url_original, &quot;http&quot;) ~ &quot;Absoluta&quot;,
+      str_starts(url_original, &quot;/&quot;) ~ &quot;Relativa&quot;,
+      TRUE ~ &quot;Otros&quot;
+    ),
+    Es_MediaWiki = case_when(
+      Tipo == &quot;Relativa&quot; ~ TRUE,
+      str_detect(url_original, &quot;[https://www.mediawiki.org](https://www.mediawiki.org)&quot;) ~ TRUE,
+      TRUE ~ FALSE
+    )
+  )
+
+# Mostramos las primeras filas del resultado
+head(df_tidy)</code></pre>
+<pre><code>##                                   url_original     Tipo Es_MediaWiki
+## 1                                 #bodyContent    Otros        FALSE
+## 2                              /wiki/MediaWiki Relativa         TRUE
+## 3                               /wiki/Download Relativa         TRUE
+## 4 /wiki/Special:MyLanguage/Category:Extensions Relativa         TRUE
+## 5              https://techblog.wikimedia.org/ Absoluta        FALSE
+## 6   /wiki/Special:MyLanguage/How_to_contribute Relativa         TRUE</code></pre>
+<p>Justificación de los Pasos Tomados Uso de XPath: Se utiliza //a para
+localizar todos los elementos de anclaje en el documento XML generado
+anteriormente. Esta es la forma más precisa de navegar por el árbol
+DOM.</p>
+<p>Tratamiento de NAs: Como indica el consejo del PDF, al convertir
+datos de la web es común encontrar valores nulos. Usamos
+filter(!is.na(…)) para asegurar que los análisis estadísticos
+posteriores no fallen.</p>
+<p>Criterio de Clasificación:</p>
+<p>URLs Relativas: Se consideran automáticamente como internas (apuntan
+dentro de MediaWiki).</p>
+<p>URLs Absolutas: Se verifica si contienen el dominio oficial para
+distinguirlas de enlaces externos.</p>
+<p>Enfoque Tidy Data: El resultado es una tabla donde cada fila es una
+observación (un enlace) y cada columna es una variable (URL, Tipo,
+Pertenencia), facilitando el uso de ggplot2 en el siguiente paso.</p>
 </div>
 <div id="analizar-el-contenido-de-la-web-buscando-todos-los-enlaces-que-en-html-se-etiquetan-como-a-buscando-el-texto-del-enlace-así-como-la-url." class="section level3">
 <h3>3. Analizar el contenido de la web, buscando todos los enlaces (que
 en HTML se etiquetan como “a”), buscando el texto del enlace, así como
 la URL.</h3>
+<pre class="r"><code># 1. Definimos una función para obtener el status de una URL
+get_status &lt;- function(url) {
+  # Si es relativa, le añadimos el dominio base
+  full_url &lt;- if(str_starts(url, &quot;/&quot;)) paste0(&quot;[https://www.mediawiki.org](https://www.mediawiki.org)&quot;, url) else url
+  
+  tryCatch({
+    res &lt;- HEAD(full_url, timeout(2)) # Usamos HEAD por ser más rápido que GET
+    return(status_code(res))
+  }, error = function(e) return(NA))
+}
+
+# 2. Aplicamos la función a una muestra de los datos (para agilizar el proceso)
+set.seed(123)
+df_status &lt;- df_tidy %&gt;%
+  sample_n(20) %&gt;% # Tomamos 20 enlaces como muestra representativa
+  rowwise() %&gt;%
+  mutate(Status = get_status(url_original)) %&gt;%
+  ungroup()
+
+# 3. Limpieza de resultados (gestión de NAs según el PDF)
+df_status &lt;- df_status %&gt;%
+  mutate(Status = ifelse(is.na(Status), &quot;Error/Timeout&quot;, as.character(Status)))</code></pre>
 </div>
 <div id="generar-una-tabla-con-cada-enlace-encontrado-indicando-el-texto-que-acompaña-el-enlace-y-el-número-de-veces-que-aparece-un-enlace-con-ese-mismo-objetivo." class="section level3">
 <h3>4. Generar una tabla con cada enlace encontrado, indicando el texto
