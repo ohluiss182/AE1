@@ -365,17 +365,29 @@ Ciberamenazas</h1>
 <div id="descargar-la-página-web-de-la-url-indicada-y-almacenarlo-en-un-formato-de-r-apto-para-ser-tratado." class="section level3">
 <h3>1. Descargar la página web de la URL indicada, y almacenarlo en un
 formato de R apto para ser tratado.</h3>
+<p><strong>Enunciado:</strong> El primer paso para realizar tareas de
+crawling y scraping es poder descargar los datos de la web. Para esto
+usaremos la capacidad de R y de sus librerías (httr y XML) para
+descargar webs y almacenarlas en variables que podamos convertir en un
+formato fácil de analizar (p.e. de HTML a XML)</p>
+<p><strong>Respuesta:</strong></p>
+<p>Primero, usando la librería <code>httr</code>, gestionamos la
+petición (<code>GET</code>) y aseguramos la respuesta exitosa mediante
+la variable <code>respuesta</code>.</p>
 <pre class="r"><code># Descarga de la página web
 url_mediawiki &lt;- &quot;https://www.mediawiki.org/wiki/MediaWiki&quot;
 respuesta &lt;- GET(url_mediawiki)
-
-# Convertimos a formato XML para facilitar el análisis
+status_code(respuesta)</code></pre>
+<pre><code>## [1] 200</code></pre>
+<p>Luego de asegurada la respuesta, usamos las funciones
+<code>content</code> y <code>htmlParse</code> para crear un árbol DOM
+(Document Object Model) que optimiza las búsquedas posteriores mediante
+<code>XPath</code> sin saturar el servidor con nuevas peticiones.</p>
+<pre class="r"><code># Convertimos a formato XML para facilitar el análisis
 contenido_html &lt;- content(respuesta, as = &quot;text&quot;)
 parsed_item &lt;- htmlParse(contenido_html, asText = TRUE)</code></pre>
-<p>Justificación: Se utiliza httr para gestionar la petición y asegurar
-un status_code exitoso. El uso de htmlParse permite crear un árbol DOM
-(Document Object Model) que optimiza las búsquedas posteriores mediante
-XPath sin saturar el servidor con nuevas peticiones.</p>
+<p>Una vez almacenada la variable, podemos continuar con las demás
+actividades.</p>
 </div>
 <div id="analizar-el-contenido-de-la-web-buscando-el-título-de-la-página-que-en-html-se-etiqueta-como-title." class="section level3">
 <h3>2. Analizar el contenido de la web, buscando el título de la página
