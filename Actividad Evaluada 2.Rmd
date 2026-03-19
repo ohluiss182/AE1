@@ -163,7 +163,9 @@ En este paso podemos usar la función HEAD de la librería “httr”, que en 
 
 Tras la extracción y consolidación de los activos digitales, se procedió a validar la integridad operativa de los recursos. Este paso es crítico en la detección de ciberamenazas y mantenimiento de infraestructura, ya que permite identificar enlaces rotos, redirecciones sospechosas o servicios no disponibles que podrían comprometer la experiencia del usuario o la seguridad del sitio.
 
-Dada la densidad de enlaces identificados, se implementó un algoritmo de muestreo aleatorio asistido por técnicas de programación defensiva. Esto asegura una evaluación estadística representativa sin incurrir en una sobrecarga de peticiones al servidor destino.
+La validación se ejecuta sobre el conjunto de URLs únicas (`df_frecuencias`). Al eliminar la redundancia de enlaces repetidos, se reduce drásticamente el número de peticiones necesarias, incrementando la eficiencia del proceso de auditoría.
+
+Se optó por el método HEAD en lugar de GET. Esta decisión permite recuperar exclusivamente la cabecera de respuesta (metadatos y códigos de estado), optimizando el tiempo de ejecución y reduciendo el consumo de ancho de banda. Así mismo, `tryCatch` permite que el análisis sea resiliente ante fallos de red, timeouts o URLs malformadas. Los errores se capturan como valores NA.
 
 ```{r verificacion-status}
 # Función de comprobación de salud de la URL
@@ -176,7 +178,11 @@ verificar_status <- function(url_input) {
     return(status_code(res))
   }, error = function(e) return(NA))
 }
+```
 
+Dada la densidad de enlaces identificados, se implementó un algoritmo de muestreo aleatorio. Esto asegura una evaluación estadística representativa sin incurrir en una sobrecarga de peticiones al servidor destino.
+
+```{r verificacion-status2}
 # Validación sobre una muestra para eficiencia del reporte
 set.seed(123)
 df_verificacion <- df_frecuencias %>%
@@ -188,12 +194,6 @@ df_verificacion <- df_frecuencias %>%
 kable(df_verificacion[, c("URL", "Status_HTTP")], caption = "Muestra de verificación de disponibilidad")
 ```
 
-Se optó por el método HEAD en lugar de GET. Esta decisión permite recuperar exclusivamente la cabecera de respuesta (metadatos y códigos de estado), optimizando el tiempo de ejecución y reduciendo el consumo de ancho de banda, una práctica estándar en el desarrollo de crawlers profesionales.
-
-Gestión de Excepciones y Resiliencia: El uso de bloques tryCatch permite que el análisis sea resiliente ante fallos de red, timeouts o URLs malformadas. Los errores se capturan como valores NA, cumpliendo con las directrices de manejo de datos incompletos sugeridas en el protocolo de la actividad.
-
-Optimización del Espacio Muestral: La validación se ejecuta sobre el conjunto de URLs únicas (df_frecuencias). Al eliminar la redundancia de enlaces repetidos, se reduce drásticamente el número de peticiones necesarias, incrementando la eficiencia del proceso de auditoría.
-
 ## Pregunta 2
 
 A continuación, se presenta una infografía compuesta por tres visualizaciones críticas que resumen la estructura y salud del portal analizado. El objetivo es transformar los datos técnicos en información visual estratégica para la toma de decisiones.
@@ -201,8 +201,6 @@ A continuación, se presenta una infografía compuesta por tres visualizaciones 
 ### 1.Un histograma con la frecuencia de aparición de los enlaces, pero separado por URLs absolutas (con “http…”) y URLs relativas.
 
 **Descripción:** Distribución de la frecuencia de aparición de los enlaces, diferenciando entre URLs absolutas (enlaces completos) y relativas (enlaces internos del sitio).
-
-
 
 ```{r histograma-frecuencias}
 # Clasificación de enlaces por tipo de ruta
