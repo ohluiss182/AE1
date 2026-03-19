@@ -129,9 +129,9 @@ Para poder realizar esta actividad, es necesario primero crear un data frame `df
 
 -   Filtrado de NA, para eliminar enlaces nulos.
 
--   Agrupación por enlace.
+-   Agrupación por enlace y por texto (para mantener una referencia legible del enlace).
 
--   Sumarización y agregado por texto (para mantener una referencia legible del enlace).
+-   Sumarización
 
 -   Ordenar frecuencia de forma descendente.
 
@@ -227,9 +227,9 @@ A continuación, se presenta una infografía compuesta por tres visualizaciones 
 
 ### 1.Un histograma con la frecuencia de aparición de los enlaces, pero separado por URLs absolutas (con “http…”) y URLs relativas.
 
-**Enunciado:** 
+**Enunciado:**
 
-A partir de los enlaces obtenidos en el apartado anterior debemos analizar la frecuencia  con la que aparecen en la página web y distinguir entre URLs absolutas y URLs relativas. Para ello, clasificaremos cada enlace según su tipo de ruta y generaremos un histograma que permita visualizar la distribución de frecuencias.
+A partir de los enlaces obtenidos en el apartado anterior debemos analizar la frecuencia con la que aparecen en la página web y distinguir entre URLs absolutas y URLs relativas. Para ello, clasificaremos cada enlace según su tipo de ruta y generaremos un histograma que permita visualizar la distribución de frecuencias.
 
 **Respuesta:**
 
@@ -237,13 +237,13 @@ Primero, utilizamos la tabla de frecuencia obtenida previamente y clasificamos c
 
 ```{r histograma-frecuencias}
 # Clasificación de enlaces por tipo de ruta
-df_graficos <- df_frecuencias %>%
+df_graficos <- df_verificacion %>%
   mutate(Tipo = ifelse(str_starts(URL, "http"), "Absoluta", "Relativa"))
 ```
 
 Una vez clasificados los enlaces, generamos un histograma que muestre la distribución de la frecuencia de aparición de los enlaces, separando los resultados según el tipo de URL.
 
-```{r histograma-frecuencias}
+```{r histograma-frecuencias2}
 # Generación del histograma
 p1 <- ggplot(df_graficos, aes(x = Frecuencia, fill = Tipo)) +
   geom_histogram(bins = 15, position = "dodge", na.rm = TRUE) +
@@ -251,11 +251,13 @@ p1 <- ggplot(df_graficos, aes(x = Frecuencia, fill = Tipo)) +
        x = "Número de Apariciones", 
        y = "Cantidad de URLs") +
   theme_minimal()
+
+p1
 ```
 
-Este gráfico permite observar el comportamiento de los enlaces dentro del portal, diferenciando entre enlaces internos y externos, lo que resulta inútil para analizar la estructura de navegación del sitio web.
+Este gráfico permite observar la distribución de la frecuencia de aparición de los enlaces, diferenciando entre enlaces internos (relativos) y externos (absolutos).
 
-**Justificación:** El histograma permite observar la distribución de la frecuencia de aparición de los enlaces dentro de la página. En general se espera que las URLs relativas sean más numerosas, ya que corresponden a enlaces internos del sitio, mientras que las URLs absolutas suelen apuntar a recursos externos o estructurales, por lo que aparecen con menor frecuencia.
+Se aprecia que la mayoría de las URLs presentan una frecuencia baja, lo que indica que la mayor parte de los enlaces aparecen de forma puntual dentro del sitio. Además, la presencia de valores de frecuencia más elevados puede asociarse a elementos estructurales del sitio, como menús de navegación o enlaces recurrentes.
 
 ### 2. Un gráfico de barras indicando la suma de enlaces que apuntan a otros dominios o servicios (distinto a <https://www.mediawiki.org> en el caso de ejemplo) vs. la suma de los otros enlaces.
 
@@ -270,8 +272,7 @@ Ya que requieren la suma de enlaces que apuntan al dominio oficial de MediaWiki 
 ```{r histograma-suma1}
 # Identificación de pertenencia al dominio
 df_graficos <- df_graficos %>%
-  mutate(Destino = ifelse(Tipo == "Relativa" | str_detect(URL, "mediawiki.org"), 
-                          "MediaWiki", "Externo"))
+  mutate(Destino = ifelse(Tipo == "Relativa" | str_detect(URL, "https://www.mediawiki.org"), "MediaWiki", "Externo"))
 
 ```
 
@@ -301,54 +302,51 @@ p2
 
 ### 3. Un gráfico de tarta (pie chart) indicando los porcentajes de Status de nuestro análisis.
 
-Enunciado:
+**Enunciado:**
 
 Por ejemplo, si hay 6 enlaces con status “200” y 4 enlaces con status “404”, la tarta mostrará un 60% con la etiqueta “200” y un 40% con la etiqueta “404”. Este gráfico lo uniremos a los anteriores. El objetivo final es obtener una imagen que recopile los gráficos generados.
 
-Resultado:
+**Resultado:**
 
-Descripción: Representación porcentual de la disponibilidad de los recursos basada en el análisis de códigos de estado HTTP.
+La tarta ofrece una visión ejecutiva e inmediata de la salud del sitio. Los porcentajes calculados permiten identificar rápidamente la tasa de enlaces activos (Status 200) frente a posibles enlaces rotos o errores, facilitando una auditoría de integridad rápida. Para ello, vamos a preparar 3 segmentos de codigo.
 
-```{r tarta}
+Primero, se crea el data frame `data_pie` a partir de `df_verificacion`. Dentro, contamos la columna `Estado` y agregamos la columna `Porcentaje`.
+
+```{r tarta1}
 # Preparación de datos porcentuales
 data_pie <- df_verificacion %>%
-  filter(!is.na(Status_HTTP)) %>%
-  count(Status_HTTP) %>%
-  mutate(Porcentaje = n / sum(n, na.rm = TRUE) * 100)
+  filter(!is.na(Estado)) %>%
+  count(Estado) %>%
+  mutate(Porcentaje = n / sum(n) * 100)
+```
 
+Posterior a ello, estructuramos el gráfico, de manera que sea lo más amigable posible.
+
+```{r tarta2}
 # Generación del gráfico de tarta
-p3 <- ggplot(data_pie, aes(x = "", y = Porcentaje, fill = as.character(Status_HTTP))) +
+p3 <- ggplot(data_pie, aes(x = "", y = Porcentaje, fill = Estado)) +
   geom_bar(stat = "identity", width = 1) +
   coord_polar("y", start = 0) +
   theme_void() +
-  labs(title = "Disponibilidad Operativa (%)") +
+  labs(
+    title = "Disponibilidad Operativa (%)",
+    fill  = "Estado HTTP"
+  ) +
   geom_text(aes(label = paste0(round(Porcentaje), "%")), 
             position = position_stack(vjust = 0.5))
 ```
 
-Justificación: La tarta ofrece una visión ejecutiva e inmediata de la salud del sitio. Los porcentajes calculados permiten identificar rápidamente la tasa de enlaces activos (Status 200) frente a posibles enlaces rotos o errores, facilitando una auditoría de integridad rápida.
+Por último, cambiamos los colores para que sea mejor entendible.
 
-### 4. Infografía Final
+```{r tarta3}
+p3 <- p3 +
+  scale_fill_manual(values = c(
+    "Activo" = "#2ECC71",
+    "Redirección" = "#F1C40F",
+    "Error cliente (4xx)" = "#E67E22",
+    "Error servidor (5xx)" = "#E74C3C",
+    "Error" = "#95A5A6"
+  ))
 
-Para el análisis utilizamos tres gráficos para entender cómo funciona la página web y en qué estado se encuentra.
-
--   Primera Grafica:
-
-    Para este esenario utilizamos el histograma que muestra cuántas veces aparecen los enlaces, diferenciando entre los que son internos (relativos) y los externos o completos (absolutos). Esto ayuda a ver cómo se organiza la navegación dentro del sitio.
-
--   Segunda Grafica:
-
-    Para este esenario utilizamos el gráfico de barras que nos ayuda a comparar la cantidad total de enlaces que llevan al propio sitio (MediaWiki) frente a los que van a páginas externas. Así se puede ver si la web depende mucho de otros sitios o no.
-
--   Tercera Grafica:
-
-    Para este escenario utilizamos el gráfico de tarta, ya que nos muestra el porcentaje de enlaces que funcionan correctamente y los que tienen errores. Esto permite entender rápidamente si la página está en buen estado o si hay muchos enlaces rotos.
-
-Descripción: Integración de las visualizaciones anteriores en una sola figura compuesta directamente desde el entorno de R.
-
-```{r final}
-# Composición de los gráficos usando grid.arrange
-grid.arrange(p1, p2, p3, layout_matrix = rbind(c(1, 2), c(3, 3)))
+p3
 ```
-
-La composición permite realizar un diagnóstico integral de la plataforma. La integración de los tres gráficos en una sola imagen facilita la interpretación técnica y gerencial de los activos digitales del portal, cumpliendo con el requisito de generar la infografía mediante código reproducible en R.
