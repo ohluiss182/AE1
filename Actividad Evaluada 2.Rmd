@@ -49,32 +49,38 @@ Una vez almacenada la variable, podemos continuar con las demás actividades.
 
 ### 2. Analizar el contenido de la web, buscando el título de la página (que en HTML se etiqueta como “title”).
 
+En la primera línea, titulo_pagina \<- xpathSApply(parsed_item, "//title", xmlValue), está extrayendo el título de la página web. Para ello, se utiliza parsed_item, que es el documento HTML previamente procesado y listo para ser analizado. La función xpathSApply busca dentro de ese documento todos los nodos que coinciden con la expresión "//title", que indica que se debe encontrar la etiqueta <title> en cualquier parte del HTML. Una vez localizada, se aplica xmlValue, que se encarga de extraer el texto contenido dentro de esa etiqueta. El resultado final se guarda en la variable titulo_pagina.
+
 ```{r extraccion-limpieza}
 ### 2. Extracción del Título
 titulo_pagina <- xpathSApply(parsed_item, "//title", xmlValue)
+
+```
+
+En la segunda línea, n_caracteres \<- nchar(titulo_pagina), realiza un análisis complementario del título obtenido. La función nchar sirve para contar el número de caracteres que tiene el texto almacenado en titulo_pagina. De esta forma, se obtiene la longitud del título de la página web, y el resultado se guarda en la variable n_caracteres.
+
+```{r extraccion-limpieza}
 
 ### 2. Analisis Complementario
 n_caracteres <- nchar(titulo_pagina)
 
 ```
-Sintaxis:
 
-parsed_item: Sirve para buscar y sacar datos dentro del HTML.
+**Sintaxis:**
 
-"//title": Busca la etiqueta title en cualquier parte del documento.
+-   parsed_item: Sirve para buscar y sacar datos dentro del HTML.
 
-xmlValue: Se usa para obtener texto que esta dentro dentro de una etiqueta.
+-   "//title": Busca la etiqueta title en cualquier parte del documento.
 
-Resultados:
+-   xmlValue: Se usa para obtener texto que esta dentro dentro de una etiqueta.
 
+**Resultados:**
 
-Titulo extraido: r titulo_pagina
-Longitud: r n_caracteres caracteres
+Se ha extraído el título r titulo_pagina, cuya longitud es de r n_caracteres caracteres.
 
 **Justificación:**
 
 El titulo es el metadato principal de identidad. Se accede a èl mdiante XPath. La validaciòn de su longitud asegura que el contenido sea legible y no presenta anomalìas estructurales.
-
 
 ### 3. Analizar el contenido de la web, buscando todos los enlaces (que en HTML se etiquetan como “a”), buscando el texto del enlace, así como la URL.
 
@@ -118,11 +124,9 @@ Finalmente, mostramos los primeros registros para comprobar que la extracción s
 head(df_enlaces_raw)
 ```
 
-
 **Justificación:**
 
 Se utiliza XPath para localizar todos los nodos de tipo anclaje. Al extraer ambos atributos por separado y unirlos en un data frame, cumplimos con el principio de "Datos Elegantes", donde cada fila es una observación de un enlace encontrado en el HTML.
-
 
 ### 4. Generar una tabla con cada enlace encontrado, indicando el texto que acompaña el enlace, y el número de veces que aparece un enlace con ese mismo objetivo.
 
@@ -151,8 +155,7 @@ Justificación: En este paso se agrupan los datos por el campo URL. Esto permite
 
 Tras la extracción y consolidación de los activos digitales, se procedió a validar la integridad operativa de los recursos. Este paso es crítico en la detección de ciberamenazas y mantenimiento de infraestructura, ya que permite identificar enlaces rotos, redirecciones sospechosas o servicios no disponibles que podrían comprometer la experiencia del usuario o la seguridad del sitio.
 
-Protocolo de Validación Técnica
-Dada la densidad de enlaces identificados, se implementó un algoritmo de muestreo aleatorio asistido por técnicas de programación defensiva. Esto asegura una evaluación estadística representativa sin incurrir en una sobrecarga de peticiones al servidor destino.
+Protocolo de Validación Técnica Dada la densidad de enlaces identificados, se implementó un algoritmo de muestreo aleatorio asistido por técnicas de programación defensiva. Esto asegura una evaluación estadística representativa sin incurrir en una sobrecarga de peticiones al servidor destino.
 
 ```{r verificacion-status}
 # Función de comprobación de salud de la URL
@@ -177,8 +180,7 @@ df_verificacion <- df_frecuencias %>%
 kable(df_verificacion[, c("URL", "Status_HTTP")], caption = "Muestra de verificación de disponibilidad")
 ```
 
-Justificación Técnica y Decisiones de Arquitectura
-Eficiencia mediante Peticiones HEAD: Se optó por el método HEAD en lugar de GET. Esta decisión técnica permite recuperar exclusivamente la cabecera de respuesta (metadatos y códigos de estado), optimizando el tiempo de ejecución y reduciendo el consumo de ancho de banda, una práctica estándar en el desarrollo de crawlers profesionales.
+Justificación Técnica y Decisiones de Arquitectura Eficiencia mediante Peticiones HEAD: Se optó por el método HEAD en lugar de GET. Esta decisión técnica permite recuperar exclusivamente la cabecera de respuesta (metadatos y códigos de estado), optimizando el tiempo de ejecución y reduciendo el consumo de ancho de banda, una práctica estándar en el desarrollo de crawlers profesionales.
 
 Normalización de Rutas Relativas: Se implementó un motor de reconstrucción de URLs para convertir rutas locales (ej. /wiki/...) en URLs absolutas funcionales. Este proceso garantiza que las peticiones internas de la plataforma MediaWiki sean procesadas correctamente por el protocolo HTTP.
 
