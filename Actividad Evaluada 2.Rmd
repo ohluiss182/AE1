@@ -11,12 +11,9 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
 
 ```{r librerias}
-library(readr)
+library(httr)
+library(XML)
 library(tidyverse)
-library(stringr)
-library(knitr)
-library(dplyr)
-library(DT)
 ```
 
 # 1. Datos Elegantes + Análisis de Datos con Web Scrapping
@@ -24,6 +21,21 @@ library(DT)
 ## Pregunta 1
 
 ### 1. Descargar la página web de la URL indicada, y almacenarlo en un formato de R apto para ser tratado.
+
+```{r descarga-datos}
+# Definir la URL
+url_mediawiki <- "https://www.mediawiki.org/wiki/MediaWiki"
+
+# Intentar la descarga ahora que la librería está cargada
+respuesta <- GET(url_mediawiki)
+
+# Verificar si la descarga fue exitosa (Status 200)
+print(status_code(respuesta))
+
+# Extraer contenido y parsear como indica el PDF
+contenido_html <- content(respuesta, as = "text")
+parsed_item <- htmlParse(contenido_html, asText = TRUE)
+```
 
 ### 2. Analizar el contenido de la web, buscando el título de la página (que en HTML se etiqueta como “title”).
 

@@ -358,12 +358,9 @@ Ciberamenazas</h1>
 </div>
 
 
-<pre class="r"><code>library(readr)
-library(tidyverse)
-library(stringr)
-library(knitr)
-library(dplyr)
-library(DT)</code></pre>
+<pre class="r"><code>library(httr)
+library(XML)
+library(tidyverse)</code></pre>
 <div id="datos-elegantes-análisis-de-datos-con-web-scrapping" class="section level1">
 <h1>1. Datos Elegantes + Análisis de Datos con Web Scrapping</h1>
 <div id="pregunta-1" class="section level2">
@@ -371,6 +368,18 @@ library(DT)</code></pre>
 <div id="descargar-la-página-web-de-la-url-indicada-y-almacenarlo-en-un-formato-de-r-apto-para-ser-tratado." class="section level3">
 <h3>1. Descargar la página web de la URL indicada, y almacenarlo en un
 formato de R apto para ser tratado.</h3>
+<pre class="r"><code># Definir la URL
+url_mediawiki &lt;- &quot;https://www.mediawiki.org/wiki/MediaWiki&quot;
+
+# Intentar la descarga ahora que la librería está cargada
+respuesta &lt;- GET(url_mediawiki)
+
+# Verificar si la descarga fue exitosa (Status 200)
+print(status_code(respuesta))</code></pre>
+<pre><code>## [1] 200</code></pre>
+<pre class="r"><code># Extraer contenido y parsear como indica el PDF
+contenido_html &lt;- content(respuesta, as = &quot;text&quot;)
+parsed_item &lt;- htmlParse(contenido_html, asText = TRUE)</code></pre>
 </div>
 <div id="analizar-el-contenido-de-la-web-buscando-el-título-de-la-página-que-en-html-se-etiqueta-como-title." class="section level3">
 <h3>2. Analizar el contenido de la web, buscando el título de la página
