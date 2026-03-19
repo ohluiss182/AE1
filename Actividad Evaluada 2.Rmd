@@ -227,13 +227,23 @@ A continuación, se presenta una infografía compuesta por tres visualizaciones 
 
 ### 1.Un histograma con la frecuencia de aparición de los enlaces, pero separado por URLs absolutas (con “http…”) y URLs relativas.
 
-**Descripción:** Distribución de la frecuencia de aparición de los enlaces, diferenciando entre URLs absolutas (enlaces completos) y relativas (enlaces internos del sitio).
+**Enunciado:** 
+
+A partir de los enlaces obtenidos en el apartado anterior debemos analizar la frecuencia  con la que aparecen en la página web y distinguir entre URLs absolutas y URLs relativas. Para ello, clasificaremos cada enlace según su tipo de ruta y generaremos un histograma que permita visualizar la distribución de frecuencias.
+
+**Respuesta:**
+
+Primero, utilizamos la tabla de frecuencia obtenida previamente y clasificamos cada URL según su tipo. Consideramos como URL absoluta aquellas que comienzan con "http", mientras que el resto se considera URLs relativas, ya que corresponden a enlaces internos del site.
 
 ```{r histograma-frecuencias}
 # Clasificación de enlaces por tipo de ruta
 df_graficos <- df_frecuencias %>%
   mutate(Tipo = ifelse(str_starts(URL, "http"), "Absoluta", "Relativa"))
+```
 
+Una vez clasificados los enlaces, generamos un histograma que muestre la distribución de la frecuencia de aparición de los enlaces, separando los resultados según el tipo de URL.
+
+```{r histograma-frecuencias}
 # Generación del histograma
 p1 <- ggplot(df_graficos, aes(x = Frecuencia, fill = Tipo)) +
   geom_histogram(bins = 15, position = "dodge", na.rm = TRUE) +
@@ -243,13 +253,15 @@ p1 <- ggplot(df_graficos, aes(x = Frecuencia, fill = Tipo)) +
   theme_minimal()
 ```
 
-Justificación: El histograma permite observar el comportamiento de la navegación en el portal. Técnicamente, se espera que las URLs relativas sean más numerosas pero de baja frecuencia (correspondientes a contenido específico), mientras que las absolutas suelen ser estructurales y presentar una mayor recurrencia.
+Este gráfico permite observar el comportamiento de los enlaces dentro del portal, diferenciando entre enlaces internos y externos, lo que resulta inútil para analizar la estructura de navegación del sitio web.
+
+**Justificación:** El histograma permite observar la distribución de la frecuencia de aparición de los enlaces dentro de la página. En general se espera que las URLs relativas sean más numerosas, ya que corresponden a enlaces internos del sitio, mientras que las URLs absolutas suelen apuntar a recursos externos o estructurales, por lo que aparecen con menor frecuencia.
 
 ### 2. Un gráfico de barras indicando la suma de enlaces que apuntan a otros dominios o servicios (distinto a <https://www.mediawiki.org> en el caso de ejemplo) vs. la suma de los otros enlaces.
 
 **Enunciado:**
 
-Aquí queremos distinguir enlaces que apuntan a mediawiki versus el resto. Sabemos que las URLs relativas ya apuntan dentro, por lo tanto hay que analizar las URLs absolutas y comprobar que apunten a `https://www.mediawiki.org`.
+Aquí quere hmos distinguir enlaces que apuntan a mediawiki versus el resto. Sabemos que las URLs relativas ya apuntan dentro, por lo tanto hay que analizar las URLs absolutas y comprobar que apunten a `https://www.mediawiki.org`.
 
 **Respuesta:**
 
@@ -318,6 +330,20 @@ Justificación: La tarta ofrece una visión ejecutiva e inmediata de la salud de
 
 ### 4. Infografía Final
 
+Para el análisis utilizamos tres gráficos para entender cómo funciona la página web y en qué estado se encuentra.
+
+-   Primera Grafica:
+
+    Para este esenario utilizamos el histograma que muestra cuántas veces aparecen los enlaces, diferenciando entre los que son internos (relativos) y los externos o completos (absolutos). Esto ayuda a ver cómo se organiza la navegación dentro del sitio.
+
+-   Segunda Grafica:
+
+    Para este esenario utilizamos el gráfico de barras que nos ayuda a comparar la cantidad total de enlaces que llevan al propio sitio (MediaWiki) frente a los que van a páginas externas. Así se puede ver si la web depende mucho de otros sitios o no.
+
+-   Tercera Grafica:
+
+    Para este escenario utilizamos el gráfico de tarta, ya que nos muestra el porcentaje de enlaces que funcionan correctamente y los que tienen errores. Esto permite entender rápidamente si la página está en buen estado o si hay muchos enlaces rotos.
+
 Descripción: Integración de las visualizaciones anteriores en una sola figura compuesta directamente desde el entorno de R.
 
 ```{r final}
@@ -325,4 +351,4 @@ Descripción: Integración de las visualizaciones anteriores en una sola figura 
 grid.arrange(p1, p2, p3, layout_matrix = rbind(c(1, 2), c(3, 3)))
 ```
 
-Análisis Final: La composición permite realizar un diagnóstico integral de la plataforma. La integración de los tres gráficos en una sola imagen facilita la interpretación técnica y gerencial de los activos digitales del portal, cumpliendo con el requisito de generar la infografía mediante código reproducible en R.
+La composición permite realizar un diagnóstico integral de la plataforma. La integración de los tres gráficos en una sola imagen facilita la interpretación técnica y gerencial de los activos digitales del portal, cumpliendo con el requisito de generar la infografía mediante código reproducible en R.
