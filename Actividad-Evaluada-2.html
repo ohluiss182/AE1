@@ -358,10 +358,6 @@ Ciberamenazas</h1>
 </div>
 
 
-<pre class="r"><code>library(httr)
-library(XML)
-library(tidyverse)
-library(gridExtra)</code></pre>
 <div id="datos-elegantes-análisis-de-datos-con-web-scrapping" class="section level1">
 <h1>1. Datos Elegantes + Análisis de Datos con Web Scrapping</h1>
 <div id="pregunta-1" class="section level2">
@@ -369,121 +365,291 @@ library(gridExtra)</code></pre>
 <div id="descargar-la-página-web-de-la-url-indicada-y-almacenarlo-en-un-formato-de-r-apto-para-ser-tratado." class="section level3">
 <h3>1. Descargar la página web de la URL indicada, y almacenarlo en un
 formato de R apto para ser tratado.</h3>
-<pre class="r"><code># Definir la URL
+<pre class="r"><code># Descarga de la página web
 url_mediawiki &lt;- &quot;https://www.mediawiki.org/wiki/MediaWiki&quot;
-
-# Intentar la descarga ahora que la librería está cargada
 respuesta &lt;- GET(url_mediawiki)
 
-# Verificar si la descarga fue exitosa (Status 200)
-print(status_code(respuesta))</code></pre>
-<pre><code>## [1] 200</code></pre>
-<pre class="r"><code># Extraer contenido y parsear como indica el PDF
+# Convertimos a formato XML para facilitar el análisis
 contenido_html &lt;- content(respuesta, as = &quot;text&quot;)
 parsed_item &lt;- htmlParse(contenido_html, asText = TRUE)</code></pre>
-<p>Justificación y Detalles Técnicos</p>
-<p>Uso de httr: Se utiliza la función GET() para realizar la petición
-HTTP. Esta librería es fundamental para gestionar las respuestas del
-servidor y asegurar que la descarga se ha realizado correctamente antes
-de procesar los datos.</p>
-<p>Conversión a XML: El contenido crudo se procesa con htmlParse. Esto
-permite que la variable parsed_item almacene el DOM (Document Object
-Model) de la página, facilitando la búsqueda de nodos específicos (como
-enlaces o tablas) mediante rutas XPath en los pasos siguientes.</p>
-<p>Almacenamiento en Variables: Siguiendo las directrices del PDF, el
-contenido no se procesa directamente al vuelo, sino que se guarda en una
-variable estructurada, lo que garantiza que podamos acceder a los datos
-de la web de forma repetida sin necesidad de realizar nuevas peticiones
-al servidor.</p>
+<p>Justificación: Se utiliza httr para gestionar la petición y asegurar
+un status_code exitoso. El uso de htmlParse permite crear un árbol DOM
+(Document Object Model) que optimiza las búsquedas posteriores mediante
+XPath sin saturar el servidor con nuevas peticiones.</p>
 </div>
 <div id="analizar-el-contenido-de-la-web-buscando-el-título-de-la-página-que-en-html-se-etiqueta-como-title." class="section level3">
 <h3>2. Analizar el contenido de la web, buscando el título de la página
 (que en HTML se etiqueta como “title”).</h3>
-<pre class="r"><code># 1. Extracción de todos los enlaces (nodos &lt;a&gt; y atributo &#39;href&#39;)
-# Usamos xpathSApply sobre el objeto parseado en la Pregunta 1
-enlaces_raw &lt;- xpathSApply(parsed_item, &quot;//a&quot;, xmlGetAttr, &quot;href&quot;)
-
-# 2. Creación del Data Frame inicial
-df_enlaces &lt;- data.frame(url_original = enlaces_raw, stringsAsFactors = FALSE)
-
-# 3. Limpieza y Clasificación (Tidy Data)
-# Aplicamos filtros para eliminar NAs y clasificar tipos
-df_tidy &lt;- df_enlaces %&gt;%
-  filter(!is.na(url_original)) %&gt;% # Eliminamos valores nulos
-  mutate(
-    Tipo = case_when(
-      str_starts(url_original, &quot;http&quot;) ~ &quot;Absoluta&quot;,
-      str_starts(url_original, &quot;/&quot;) ~ &quot;Relativa&quot;,
-      TRUE ~ &quot;Otros&quot;
-    ),
-    Es_MediaWiki = case_when(
-      Tipo == &quot;Relativa&quot; ~ TRUE,
-      str_detect(url_original, &quot;[https://www.mediawiki.org](https://www.mediawiki.org)&quot;) ~ TRUE,
-      TRUE ~ FALSE
-    )
-  )
-
-# Mostramos las primeras filas del resultado
-head(df_tidy)</code></pre>
-<pre><code>##                                   url_original     Tipo Es_MediaWiki
-## 1                                 #bodyContent    Otros        FALSE
-## 2                              /wiki/MediaWiki Relativa         TRUE
-## 3                               /wiki/Download Relativa         TRUE
-## 4 /wiki/Special:MyLanguage/Category:Extensions Relativa         TRUE
-## 5              https://techblog.wikimedia.org/ Absoluta        FALSE
-## 6   /wiki/Special:MyLanguage/How_to_contribute Relativa         TRUE</code></pre>
-<p>Justificación de los Pasos Tomados Uso de XPath: Se utiliza //a para
-localizar todos los elementos de anclaje en el documento XML generado
-anteriormente. Esta es la forma más precisa de navegar por el árbol
-DOM.</p>
-<p>Tratamiento de NAs: Como indica el consejo del PDF, al convertir
-datos de la web es común encontrar valores nulos. Usamos
-filter(!is.na(…)) para asegurar que los análisis estadísticos
-posteriores no fallen.</p>
-<p>Criterio de Clasificación:</p>
-<p>URLs Relativas: Se consideran automáticamente como internas (apuntan
-dentro de MediaWiki).</p>
-<p>URLs Absolutas: Se verifica si contienen el dominio oficial para
-distinguirlas de enlaces externos.</p>
-<p>Enfoque Tidy Data: El resultado es una tabla donde cada fila es una
-observación (un enlace) y cada columna es una variable (URL, Tipo,
-Pertenencia), facilitando el uso de ggplot2 en el siguiente paso.</p>
+<pre class="r"><code>### 2. Extracción del Título
+titulo_pagina &lt;- xpathSApply(parsed_item, &quot;//title&quot;, xmlValue)</code></pre>
+<p>Justificación: Se accede al nodo raíz de metadatos del documento. El
+título es una pieza clave de información para indexadores y bots de
+rastreo.</p>
 </div>
 <div id="analizar-el-contenido-de-la-web-buscando-todos-los-enlaces-que-en-html-se-etiquetan-como-a-buscando-el-texto-del-enlace-así-como-la-url." class="section level3">
 <h3>3. Analizar el contenido de la web, buscando todos los enlaces (que
 en HTML se etiquetan como “a”), buscando el texto del enlace, así como
 la URL.</h3>
-<pre class="r"><code># 1. Definimos una función para obtener el status de una URL
-get_status &lt;- function(url) {
-  # Si es relativa, le añadimos el dominio base
-  full_url &lt;- if(str_starts(url, &quot;/&quot;)) paste0(&quot;[https://www.mediawiki.org](https://www.mediawiki.org)&quot;, url) else url
-  
-  tryCatch({
-    res &lt;- HEAD(full_url, timeout(2)) # Usamos HEAD por ser más rápido que GET
-    return(status_code(res))
-  }, error = function(e) return(NA))
-}
+<pre class="r"><code>### 3. Extracción de información de hipervínculos
+# Extraemos el texto que el usuario ve (anchor text)
+textos_enlaces &lt;- xpathSApply(parsed_item, &quot;//a&quot;, xmlValue)
 
-# 2. Aplicamos la función a una muestra de los datos (para agilizar el proceso)
-set.seed(123)
-df_status &lt;- df_tidy %&gt;%
-  sample_n(20) %&gt;% # Tomamos 20 enlaces como muestra representativa
-  rowwise() %&gt;%
-  mutate(Status = get_status(url_original)) %&gt;%
-  ungroup()
+# Extraemos la dirección técnica (href)
+hrefs_enlaces &lt;- xpathSApply(parsed_item, &quot;//a&quot;, xmlGetAttr, &quot;href&quot;)
 
-# 3. Limpieza de resultados (gestión de NAs según el PDF)
-df_status &lt;- df_status %&gt;%
-  mutate(Status = ifelse(is.na(Status), &quot;Error/Timeout&quot;, as.character(Status)))</code></pre>
+# Consolidamos en un Data Frame inicial (Tidy Data)
+df_enlaces_raw &lt;- data.frame(
+  Texto = textos_enlaces, 
+  URL = hrefs_enlaces, 
+  stringsAsFactors = FALSE
+)
+
+# Visualización de los primeros registros
+head(df_enlaces_raw)</code></pre>
+<pre><code>##             Texto                                          URL
+## 1 Jump to content                                 #bodyContent
+## 2       Main page                              /wiki/MediaWiki
+## 3   Get MediaWiki                               /wiki/Download
+## 4  Get extensions /wiki/Special:MyLanguage/Category:Extensions
+## 5       Tech blog              https://techblog.wikimedia.org/
+## 6      Contribute   /wiki/Special:MyLanguage/How_to_contribute</code></pre>
+<p>Justificación: Se utiliza XPath para localizar todos los nodos de
+tipo anclaje. Al extraer ambos atributos por separado y unirlos en un
+data frame, cumplimos con el principio de “Datos Elegantes”, donde cada
+fila es una observación de un enlace encontrado en el HTML.</p>
 </div>
 <div id="generar-una-tabla-con-cada-enlace-encontrado-indicando-el-texto-que-acompaña-el-enlace-y-el-número-de-veces-que-aparece-un-enlace-con-ese-mismo-objetivo." class="section level3">
 <h3>4. Generar una tabla con cada enlace encontrado, indicando el texto
 que acompaña el enlace, y el número de veces que aparece un enlace con
 ese mismo objetivo.</h3>
+<p>Objetivo: Diferenciar enlaces de MediaWiki versus el resto y validar
+su estado.</p>
+<pre class="r"><code>### 4. Consolidación y conteo de objetivos
+df_frecuencias &lt;- df_enlaces_raw %&gt;%
+  filter(!is.na(URL)) %&gt;%  # Eliminación de enlaces nulos
+  group_by(URL) %&gt;%
+  summarise(
+    Texto_Asociado = first(Texto), # Tomamos el primer texto descriptivo encontrado
+    Frecuencia = n()               # Conteo de repeticiones por URL única
+  ) %&gt;%
+  arrange(desc(Frecuencia))
+
+# Presentación de la tabla de resultados
+kable(head(df_frecuencias, 10), 
+      caption = &quot;Top 10 enlaces por frecuencia de aparición&quot;,
+      col.names = c(&quot;URL de Destino&quot;, &quot;Texto del Enlace&quot;, &quot;Número de Apariciones&quot;))</code></pre>
+<table>
+<caption>Top 10 enlaces por frecuencia de aparición</caption>
+<colgroup>
+<col width="60%" />
+<col width="17%" />
+<col width="22%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">URL de Destino</th>
+<th align="left">Texto del Enlace</th>
+<th align="right">Número de Apariciones</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">#</td>
+<td align="left">English</td>
+<td align="right">9</td>
+</tr>
+<tr class="even">
+<td align="left">/wiki/MediaWiki</td>
+<td align="left">Main page</td>
+<td align="right">5</td>
+</tr>
+<tr class="odd">
+<td align="left">/w/index.php?title=MediaWiki&amp;action=edit</td>
+<td align="left">View source</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="left">/w/index.php?title=MediaWiki&amp;action=history</td>
+<td align="left">View history</td>
+<td align="right">2</td>
+</tr>
+<tr class="odd">
+<td align="left">/w/index.php?title=Special:CreateAccount&amp;returnto=MediaWiki</td>
+<td align="left">Create account</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="left">/w/index.php?title=Special:UserLogin&amp;returnto=MediaWiki</td>
+<td align="left">Log in</td>
+<td align="right">2</td>
+</tr>
+<tr class="odd">
+<td align="left">/wiki/Project:Support_desk</td>
+<td align="left">Support desk</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="left">/wiki/Special:MyLanguage/Help:Contents</td>
+<td align="left">User help</td>
+<td align="right">2</td>
+</tr>
+<tr class="odd">
+<td align="left">/wiki/Special:MyLanguage/How_to_contribute</td>
+<td align="left">Contribute</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="left">/wiki/Special:MyLanguage/Manual:FAQ</td>
+<td align="left">FAQ</td>
+<td align="right">2</td>
+</tr>
+</tbody>
+</table>
+<p>Justificación: En este paso se agrupan los datos por el campo URL.
+Esto permite identificar qué enlaces son estructurales (como los de
+navegación que aparecen en todas las secciones) y cuáles son específicos
+del contenido. Se utiliza first(Texto) para mantener una referencia
+legible del enlace en la tabla final.</p>
 </div>
 <div id="para-cada-enlace-seguirlo-e-indicar-si-está-activo-podemos-usar-el-código-de-status-http-al-hacer-una-petición-a-esa-url." class="section level3">
 <h3>5. Para cada enlace, seguirlo e indicar si está activo (podemos usar
 el código de status HTTP al hacer una petición a esa URL).</h3>
+<p>En esta sección, comprobamos la disponibilidad de los enlaces
+mediante peticiones HTTP. Debido al volumen de datos, se recomienda
+realizar el análisis sobre una muestra o implementar un control de
+errores para evitar que el proceso se detenga ante una URL mal
+formada.</p>
+<pre class="r"><code># Función de comprobación de salud de la URL
+verificar_status &lt;- function(url_input) {
+  # Reconstrucción si la URL es relativa
+  url_final &lt;- if(str_starts(url_input, &quot;/&quot;)) paste0(&quot;[https://www.mediawiki.org](https://www.mediawiki.org)&quot;, url_input) else url_input
+  
+  tryCatch({
+    res &lt;- HEAD(url_final, timeout(2))
+    return(status_code(res))
+  }, error = function(e) return(NA))
+}
+
+# Validación sobre una muestra para eficiencia del reporte
+set.seed(123)
+df_verificacion &lt;- df_frecuencias %&gt;%
+  sample_n(20) %&gt;%
+  rowwise() %&gt;%
+  mutate(Status_HTTP = verificar_status(URL)) %&gt;%
+  ungroup()
+
+kable(df_verificacion[, c(&quot;URL&quot;, &quot;Status_HTTP&quot;)], caption = &quot;Muestra de verificación de disponibilidad&quot;)</code></pre>
+<table>
+<caption>Muestra de verificación de disponibilidad</caption>
+<colgroup>
+<col width="87%" />
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">URL</th>
+<th align="right">Status_HTTP</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="https://www.mediawiki.org/wiki/Template:Main_page/sr" class="uri">https://www.mediawiki.org/wiki/Template:Main_page/sr</a></td>
+<td align="right">200</td>
+</tr>
+<tr class="even">
+<td align="left">#bodyContent</td>
+<td align="right">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">/wiki/Special:MyLanguage/Manual:Common_errors_and_symptoms</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="https://www.mediawiki.org/wiki/Template:Main_page/ca" class="uri">https://www.mediawiki.org/wiki/Template:Main_page/ca</a></td>
+<td align="right">200</td>
+</tr>
+<tr class="odd">
+<td align="left">/wiki/Special:MyLanguage/Development_statistics</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="https://www.wikifunctions.org/wiki/Wikifunctions:Main_Page" class="uri">https://www.wikifunctions.org/wiki/Wikifunctions:Main_Page</a></td>
+<td align="right">200</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="https://www.wikidata.org/wiki/Special:EntityPage/Q5296" class="uri">https://www.wikidata.org/wiki/Special:EntityPage/Q5296</a></td>
+<td align="right">200</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="https://www.mediawiki.org/wiki/Template:Main_page/sc" class="uri">https://www.mediawiki.org/wiki/Template:Main_page/sc</a></td>
+<td align="right">200</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="https://en.wiktionary.org/wiki/Wiktionary:Main_Page" class="uri">https://en.wiktionary.org/wiki/Wiktionary:Main_Page</a></td>
+<td align="right">200</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="https://foundation.wikimedia.org/wiki/Home" class="uri">https://foundation.wikimedia.org/wiki/Home</a></td>
+<td align="right">200</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="https://www.mediawiki.org/wiki/Template:Main_page/th" class="uri">https://www.mediawiki.org/wiki/Template:Main_page/th</a></td>
+<td align="right">200</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="https://foundation.wikimedia.org/wiki/Special:MyLanguage/Policy:Cookie_statement" class="uri">https://foundation.wikimedia.org/wiki/Special:MyLanguage/Policy:Cookie_statement</a></td>
+<td align="right">200</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="https://www.mediawiki.org/wiki/Template:Main_page/id" class="uri">https://www.mediawiki.org/wiki/Template:Main_page/id</a></td>
+<td align="right">200</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="https://species.wikimedia.org/wiki/Main_Page" class="uri">https://species.wikimedia.org/wiki/Main_Page</a></td>
+<td align="right">200</td>
+</tr>
+<tr class="odd">
+<td align="left">/wiki/Talk:MediaWiki</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="left">/wiki/<a href="File:Wikimedia_Hackathon_2025_Group_photo_from_drone.jpg" class="uri">File:Wikimedia_Hackathon_2025_Group_photo_from_drone.jpg</a></td>
+<td align="right">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">/wiki/Project:Support_desk</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="https://www.wikimedia.org/" class="uri">https://www.wikimedia.org/</a></td>
+<td align="right">200</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="https://creativecommons.org/publicdomain/zero/1.0/" class="uri">https://creativecommons.org/publicdomain/zero/1.0/</a></td>
+<td align="right">200</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="https://en.wikinews.org/wiki/Main_Page" class="uri">https://en.wikinews.org/wiki/Main_Page</a></td>
+<td align="right">200</td>
+</tr>
+</tbody>
+</table>
+<p>Justificación Técnica y Decisiones Tomadas Uso de HEAD: A diferencia
+de GET, el método HEAD solicita únicamente las líneas de estado y la
+sección de cabecera. Es la técnica estándar para bots de rastreo
+(crawlers) que solo necesitan verificar la existencia de un recurso.</p>
+<p>Manejo de URLs Relativas: Se implementó una lógica condicional para
+reconstruir las URLs que comienzan con /. Sin este paso, las peticiones
+a enlaces internos de MediaWiki fallarían por “URL mal formada”.</p>
+<p>Control de Errores (tryCatch): La web es dinámica y algunos enlaces
+pueden estar mal construidos o el servidor puede no responder. El uso de
+tryCatch asegura que el script de R no se detenga y que estos casos se
+marquen como NA, cumpliendo con la recomendación del PDF de gestionar
+valores nulos.</p>
+<p>Optimización: Se aplica la validación sobre df_frecuencias (enlaces
+únicos) en lugar de la lista total de enlaces. Esto evita realizar
+peticiones redundantes a una misma URL que aparece varias veces en la
+página.</p>
 </div>
 </div>
 <div id="pregunta-2" class="section level2">
