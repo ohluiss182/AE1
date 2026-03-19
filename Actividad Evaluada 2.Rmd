@@ -78,6 +78,14 @@ El titulo es el metadato principal de identidad. Se accede a èl mdiante XPath. 
 
 ### 3. Analizar el contenido de la web, buscando todos los enlaces (que en HTML se etiquetan como “a”), buscando el texto del enlace, así como la URL.
 
+**Enunciado:**
+
+Una vez descargada la página y convertida a formato XML, debemos analizar su contenido para localzar todos los enlaces HTML. Los enlaces se representan mediante la etiqueta <a>, donde el texto visible está dentro de la etiqueta y la dirección del enlace se encuentra en el atributo href. Usaremos funciones de la librería XML para extraer tanto el texto del enlace como su URL, y organizaremos los resultados en un data frame siguiendo el principio de **Datos Elegantes**, donde cada fila representa una observación.
+
+**Respuesta:**
+
+Primero, utilizamos la función xpathSApply() para buscar todos los nodos <a> dentro del documento HTML parseado, extrayendo por separado el texto visible del enlace y el atributo href, que contiene la URL.
+
 ```{r analisis-status}
 ### 3. Extracción de información de hipervínculos
 # Extraemos el texto que el usuario ve (anchor text)
@@ -86,6 +94,14 @@ textos_enlaces <- xpathSApply(parsed_item, "//a", xmlValue)
 # Extraemos la dirección técnica (href)
 hrefs_enlaces <- xpathSApply(parsed_item, "//a", xmlGetAttr, "href")
 
+# Visualización de los primeros registros
+head(df_enlaces_raw)
+```
+
+Luego consolidamos los resultamos en un **data frame**, donde cada fila corresponde a un enlace encontrado en la página.
+
+```{r analisis-status}
+
 # Consolidamos en un Data Frame inicial (Tidy Data)
 df_enlaces_raw <- data.frame(
   Texto = textos_enlaces, 
@@ -93,13 +109,20 @@ df_enlaces_raw <- data.frame(
   stringsAsFactors = FALSE
 )
 
+```
+
+Finalmente, mostramos los primeros registros para comprobar que la extracción se ha realizado correctamente.
+
+```{r analisis-status}
 # Visualización de los primeros registros
 head(df_enlaces_raw)
 ```
 
--   **Justificación:**
+
+**Justificación:**
 
 Se utiliza XPath para localizar todos los nodos de tipo anclaje. Al extraer ambos atributos por separado y unirlos en un data frame, cumplimos con el principio de "Datos Elegantes", donde cada fila es una observación de un enlace encontrado en el HTML.
+
 
 ### 4. Generar una tabla con cada enlace encontrado, indicando el texto que acompaña el enlace, y el número de veces que aparece un enlace con ese mismo objetivo.
 
