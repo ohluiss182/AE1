@@ -80,7 +80,7 @@ En la segunda línea, `n_caracteres <- nchar(titulo_pagina)`, realiza un anális
 
 ```{r extraccion-limpieza2}
 
-### 2. Analisis Complementario
+### Analisis Complementario
 n_caracteres <- nchar(titulo_pagina)
 
 ```
@@ -108,7 +108,7 @@ hrefs_enlaces <- xpathSApply(parsed_item, "//a", xmlGetAttr, "href")
 
 Luego consolidamos los resultamos en un **data frame**, donde cada fila corresponde a un enlace encontrado en la página.
 
-```{r analisis-status2}
+```{r analisis-status2, eval=!uso_memoria}
 
 # Consolidamos en un Data Frame inicial (Tidy Data)
 df_enlaces_raw <- data.frame(
