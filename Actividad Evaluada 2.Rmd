@@ -131,7 +131,7 @@ Para poder realizar esta actividad, es necesario primero crear un data frame `df
 
 -   Agrupación por enlace y por texto (para mantener una referencia legible del enlace).
 
--   Sumarización
+-   Sumarización.
 
 -   Ordenar frecuencia de forma descendente.
 
