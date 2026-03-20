@@ -182,6 +182,22 @@ kable(usuarios_con_error_detalle, col.names = c("Código de Error", "N° Usuario
 
 ### 6.Generar al menos 2 gráficos distintos que permitan visualizar alguna característica relevante de los datos analizados.
 
+
+```{r grafico_01}
+
+library(ggplot2)
+
+ggplot(usuarios_con_error_detalle, aes(x = as.factor(ResponseCode), y = Usuarios_Unicos)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(
+    title = "Usuarios únicos por tipo de error",
+    x = "Código de error",
+    y = "Número de usuarios únicos"
+  ) +
+  theme_minimal()
+
+```
+
 ### 7.Generar un gráfico que permita visualizar el número de peticiones servidas a lo largo del tiempo.
 
 ## Clústering de datos
