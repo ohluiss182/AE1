@@ -100,27 +100,59 @@ datatable(df_ae3_de)
 
 Para este análisis, clasificamos las interacciones en dos grupos: peticiones exitosas (códigos de estado 200, 302, 304) y peticiones con error (códigos 400 y 500). Se considera un "usuario único" a cada dirección IP distinta presente en los registros.
 
+El primer paso es definir qué es un "error" en el contexto de un servidor Apache. Por estándar, cualquier código de estado igual o mayor a 400 indica un problema (404 es "No encontrado", 403 es "Prohibido", etc.).
+
 ```{r exploración}
-# 1. Creamos una columna lógica para identificar errores (Códigos >= 400)
+# Creamos una columna lógica para identificar errores (Códigos >= 400)
 # Convertimos el factor ResponseCode a numérico para la comparación
 df_ae3_de <- df_ae3_de %>%
   mutate(Status_Error = as.numeric(as.character(ResponseCode)) >= 400)
+```
 
-# 2. Identificar usuarios (IPs) que NO han tenido ningún error en sus peticiones
+mutate: Crea una nueva columna llamada Status_Error.
+
+as.numeric(as.character(...)): Como en tu limpieza previa definiste ResponseCode como un Factor, R no puede compararlo directamente con un número. Primero lo volvemos texto y luego número para poder preguntar si es "mayor o igual a 400".
+
+Resultado: Tendrás una columna con valores TRUE (hay error) o FALSE (todo bien).
+
+El enunciado pide usuarios que no hayan tenido ningún error en sus interacciones.
+
+```{r sin_error}
+# Identificar usuarios (IPs) que NO han tenido ningún error en sus peticiones
 usuarios_sin_error <- df_ae3_de %>%
   group_by(IP) %>%
   summarise(total_errores = sum(Status_Error)) %>%
   filter(total_errores == 0) %>%
   nrow()
+```
 
-# 3. Identificar usuarios (IPs) que SÍ han experimentado algún error, 
+group_by(IP): Agrupamos toda la actividad por cada usuario único (su dirección IP).
+
+sum(Status_Error): Dado que TRUE vale 1 y FALSE vale 0, al sumarlos obtenemos cuántos errores cometió ese usuario específico.
+
+filter(total_errores == 0): Solo nos quedamos con los usuarios cuyo contador de errores es cero.
+
+nrow(): Contamos cuántas filas (usuarios) quedaron.
+
+buscamos a los usuarios que sí tuvieron codigo de error y queremos saber que tipo de código de error recibieron.
+
+```{r con_error}
+# Identificar usuarios (IPs) que SÍ han experimentado algún error, 
 # desglosados por la tipología (código) del error.
 usuarios_con_error_detalle <- df_ae3_de %>%
   filter(Status_Error == TRUE) %>%
   group_by(ResponseCode) %>%
   summarise(Usuarios_Unicos = n_distinct(IP))
+```
 
-# 4. Total de usuarios con al menos un error (independientemente del código)
+filter(Status_Error == TRUE): Descartamos de inmediato todas las peticiones exitosas.
+
+group_by(ResponseCode): Agrupamos por el código de error (ej: todos los del 404 juntos).
+
+n_distinct(IP): Esta función es vital. Si la IP 141.243.1.172 intentó entrar a 5 páginas que no existen, n_distinct hará que solo cuente como 1 usuario único afectado por el error 404, evitando inflar los números.
+
+```{r con_error2}
+# Total de usuarios con al menos un error (independientemente del código)
 total_usuarios_con_error <- df_ae3_de %>%
   filter(Status_Error == TRUE) %>%
   summarise(Total = n_distinct(IP)) %>%
