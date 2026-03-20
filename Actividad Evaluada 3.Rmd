@@ -277,15 +277,14 @@ Para este apartado, se analizarán los tipos de peticiones HTTP registradas en e
 ```{r analisis_peticiones_htpp, echo=TRUE, message=FALSE, warning=FALSE}
 
 # Métodos HTTP presentes y relevantes en el dataset
-metodos_http <- c("GET", "HEAD", "POST")
-filter(as.character(Tipo) %in% metodos_http) %>%
-  mutate(Tipo = factor(as.character(Tipo), levels = metodos_http)) %>%
-  count(Tipo, name = "Frecuencia") %>%
-  tidyr::complete(Tipo = factor(metodos_http, levels = metodos_http),
-                  fill = list(Frecuencia = 0)) %>%
-  arrange(Tipo)
+df_ae3_methods <- df_ae3_de %>%
+  group_by(Tipo) %>%
+  summarise(
+    Frecuencia = n(), # Conteo de repeticiones por URL única
+  ) %>%
+  arrange(desc(Frecuencia))
 
-# 2. Filtrado de recursos de imagen según la extensión de la URL
+# Filtrado de recursos de imagen según la extensión de la URL
 df_imagenes <- df_ae3_de %>%
   filter(
     str_detect(
@@ -295,21 +294,19 @@ df_imagenes <- df_ae3_de %>%
     )
   )
 
-# 3. Frecuencia de peticiones HTTP solo para recursos de imagen
-frecuencia_http_imagenes <- df_imagenes %>%
-  filter(as.character(Tipo) %in% metodos_http) %>%
-  mutate(Tipo = factor(as.character(Tipo), levels = metodos_http)) %>%
-  count(Tipo, name = "Frecuencia") %>%
-  tidyr::complete(Tipo = factor(metodos_http, levels = metodos_http),
-                  fill = list(Frecuencia = 0)) %>%
-  arrange(Tipo)
-
+# Frecuencia de peticiones HTTP solo para recursos de imagen
+df_ae3_methods_imagenes <- df_imagenes %>%
+  group_by(Tipo) %>%
+  summarise(
+    Frecuencia = n(), # Conteo de repeticiones por URL única
+  ) %>%
+  arrange(desc(Frecuencia))
 ```
 
 En primer lugar, se obtiene la distribución de las peticiones HTTP registradas en el servidor. Este análisis permite identificar qué método es el más utilizado durante la interacción con los recursos servidos.
 
-```{}         
-kable(frecuencia_http,
+```{r analisis_peticiones_htpp2, echo=TRUE, message=FALSE, warning=FALSE}         
+kable(df_ae3_methods,
       col.names = c("Método HTTP", "Frecuencia"),
       caption = "Frecuencia de peticiones HTTP en el total del dataset")
 ```
@@ -320,9 +317,8 @@ A partir de los resultados obtenidos, se observa que el método predominante es 
 
 A continuación, se repite el análisis considerando únicamente las peticiones realizadas sobre recursos de tipo imagen. Para ello, se han filtrado las URLs cuya extensión corresponde a formatos gráficos habituales, como .jpg, .jpeg, .png, .gif, .bmp, .webp, .svg, .tif, .tiff o .ico.
 
-```{}         
-
-kable(frecuencia_http_imagenes,
+```{r analisis_peticiones_htpp3, echo=TRUE, message=FALSE, warning=FALSE}         
+kable(df_ae3_methods_imagenes,
       col.names = c("Método HTTP", "Frecuencia"),
       caption = "Frecuencia de peticiones HTTP sobre recursos de tipo imagen")
       
@@ -363,7 +359,7 @@ Este gráfico de barras nos muestra la frecuencia de los métodos HTTP GET, POST
 
 library(ggplot2)
 
-ggplot(frecuencia_http, aes(x = Tipo, y = Frecuencia)) +
+ggplot(df_ae3_methods, aes(x = Tipo, y = Frecuencia)) +
   geom_bar(stat = "identity", fill = "steelblue") +
   geom_text(aes(label = Frecuencia), vjust = -0.3) +
   labs(
@@ -385,7 +381,7 @@ Este gráfico de barras nos presenta la frecuencia de los principales métodos H
 
 library(ggplot2)
 
-ggplot(frecuencia_http, aes(x = Tipo, y = Frecuencia)) +
+ggplot(df_ae3_methods, aes(x = Tipo, y = Frecuencia)) +
   geom_bar(stat = "identity", fill = "steelblue") +
   labs(
     title = "Frecuencia de Peticiones HTTP en el Total",
