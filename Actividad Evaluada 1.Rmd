@@ -118,7 +118,6 @@ df <- read.table("epa-http.csv", header = FALSE, sep = " ", fill = TRUE, strings
 colnames(df) <- c("IP", "Time", "Request", "ResponseCode", "Bytes")
 ```
 
-
 ### Pregunta 1
 
 **¿Cuáles son las dimensiones del dataset cargado (número de filas y columnas)?**
