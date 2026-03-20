@@ -1,0 +1,23 @@
+---
+title: "Actividad Evaluable 2: Seminario Internacional en Herramientas y Técnicas de Detección de Ciberamenazas"
+author: "Grupo CJLR"
+date: "20 de marzo de 2026"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+# Configuración global de los chunks
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{r librerias, include=FALSE}
+
+```
+
+# Análisis de logs de servidor usando R (parte II)
+
+## Obtención y carga de los Datos:
+
+### 1.Descomprimir el fichero comprimido que contiene los registros del servidor, y a partir de los datos extraídos, cargar en data frame los registros con las peticiones servidas.
+
+### 2.Incluid en el documento un apartado con la descripción de los datos analizados: fuente, tipología, descripción de la información contenida (los diferentes campos) y sus valores.
