@@ -17,6 +17,8 @@ library(stringr)
 library(knitr)
 library(dplyr)
 library(DT)
+library(mltools)
+library(data.table)
 ```
 
 # Análisis de logs de servidor usando R (parte II)
@@ -203,5 +205,35 @@ ggplot(usuarios_con_error_detalle, aes(x = as.factor(ResponseCode), y = Usuarios
 ## Clústering de datos
 
 ### 8.Utilizando un algoritmo de aprendizaje no supervisado, realizad un análisis de clústering con k-means para los datos del servidor.
+
+Para realizar el agrupamiento, primero debemos transformar nuestro data frame elegante en una matriz puramente numérica. Seguimos las instrucciones de generar una métrica sobre el recurso servido (longitud de la URL) y expandir las variables categóricas.
+
+```{r metrica_url}
+# Generar columna numérica de longitud de URL [cite: 66]
+df_ae3_de$URL_Length <- nchar(as.character(df_ae3_de$URL))
+```
+
+Lógica: El algoritmo K-means solo trabaja con números. Como no podemos meter la URL "/software.html" directamente, extraemos su longitud (ej. 14 caracteres).Utilidad: Esto ayuda al modelo a diferenciar entre peticiones a la raíz / (cortas) de peticiones a recursos profundos o intentos de ataque con parámetros largos.
+
+```{r NA}
+# Imputación de NAs en Bytes 
+# Si el código es 404 o similar, asumimos 0 bytes servidos
+df_ae3_clustering <- df_ae3_de %>%
+  mutate(Bytes = ifelse(is.na(Bytes) | Bytes == 0, 0, Bytes))
+
+# Selección de variables y One-Hot Encoding [cite: 68, 70, 71]
+# Solo usaremos Tipo, ResponseCode, Bytes y URL_Length
+df_select <- df_ae3_clustering %>%
+  select(Tipo, ResponseCode, Bytes, URL_Length)
+
+# Convertimos a data.table para usar la función recomendada
+df_dt <- as.data.table(df_select)
+df_one_hot <- one_hot(df_dt, sparsifyNAs = TRUE)
+
+# 4. Normalización (Paso crítico para K-means)
+# Como Bytes tiene valores muy grandes comparado con URL_Length, 
+# escalamos los datos para que ninguna variable domine a la otra.
+df_scaled <- scale(df_one_hot)
+```
 
 ### 9.Representad visualmente en gráficos de tipo scatter plot el resultado de vuestros clústering y interpretad el resultado obtenido
