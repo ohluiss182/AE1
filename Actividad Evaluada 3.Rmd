@@ -332,7 +332,15 @@ En conclusión, la análisis confirma que las peticiones de tipo GET concentran 
 
 ### 6.Generar al menos 2 gráficos distintos que permitan visualizar alguna característica relevante de los datos analizados.
 
+<<<<<<< HEAD
+=======
+
+Gráfico 1: Usuarios únicos por tipo de error
+Este gráfico de barras nos muestra la cantidad de usuarios únicos afectados según cada tipo de error HTTP (códigos 4xx y 5xx). Ademas, nos permite identificar qué errores tienen mayor impacto en los usuarios, facilitando la detección de posibles problemas en el servidor o en la gestión de solicitudes.
+
+>>>>>>> 1af95800c35b443fe472909dcbde8422116c9545
 ```{r grafico_01}
+
 
 library(ggplot2)
 
@@ -347,6 +355,25 @@ ggplot(usuarios_con_error_detalle, aes(x = as.factor(ResponseCode), y = Usuarios
 
 ```
 
+Gráfico 2: Frecuencia de peticiones HTTP en el total
+Este gráfico de barras nos presenta la frecuencia de los principales métodos HTTP (GET, POST, PUT, DELETE) en el conjunto total de datos. Tambien, nos permite observar qué tipo de petición es más utilizada por los usuarios, destacando el predominio de las solicitudes orientadas a la consulta de recursos.
+
+```{r grafico_02}
+
+
+library(ggplot2)
+
+ggplot(frecuencia_http, aes(x = Tipo, y = Frecuencia)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(
+    title = "Frecuencia de Peticiones HTTP en el Total",
+    x = "Método HTTP",
+    y = "Frecuencia"
+  ) +
+  theme_minimal()
+
+```
+
 ### 7.Generar un gráfico que permita visualizar el número de peticiones servidas a lo largo del tiempo.
 
 ## Clústering de datos
@@ -355,32 +382,55 @@ ggplot(usuarios_con_error_detalle, aes(x = as.factor(ResponseCode), y = Usuarios
 
 Para realizar el agrupamiento, primero debemos transformar nuestro data frame elegante en una matriz puramente numérica. Seguimos las instrucciones de generar una métrica sobre el recurso servido (longitud de la URL) y expandir las variables categóricas.
 
+Creación de la métrica de URL
+El algoritmo K-means solo trabaja con números. Como no podemos meter la URL "/software.html" directamente, extraemos su longitud.Esto ayuda al modelo a diferenciar entre peticiones a la raíz / (cortas) de peticiones a recursos profundos o intentos de ataque con parámetros largos.
+
 ```{r metrica_url}
 # Generar columna numérica de longitud de URL [cite: 66]
 df_ae3_de$URL_Length <- nchar(as.character(df_ae3_de$URL))
 ```
 
-Lógica: El algoritmo K-means solo trabaja con números. Como no podemos meter la URL "/software.html" directamente, extraemos su longitud (ej. 14 caracteres).Utilidad: Esto ayuda al modelo a diferenciar entre peticiones a la raíz / (cortas) de peticiones a recursos profundos o intentos de ataque con parámetros largos.
+NAs y Selección
+Si un recurso no devolvió bytes (como un error 404), le asignamos 0 para que el modelo pueda procesar la fila sin descartarla.
 
 ```{r NA}
-# Imputación de NAs en Bytes 
 # Si el código es 404 o similar, asumimos 0 bytes servidos
 df_ae3_clustering <- df_ae3_de %>%
   mutate(Bytes = ifelse(is.na(Bytes) | Bytes == 0, 0, Bytes))
+```
 
-# Selección de variables y One-Hot Encoding [cite: 68, 70, 71]
+One-Hot Encoding (traductor)
+Esta función crea una columna nueva para cada categoría. Si la petición es "GET", pondrá un 1 en la columna Tipo_GET y un 0 en las demás. Así, el algoritmo puede medir la "distancia" entre un GET y un POST.
+
+```{r peticiòn}
 # Solo usaremos Tipo, ResponseCode, Bytes y URL_Length
 df_select <- df_ae3_clustering %>%
   select(Tipo, ResponseCode, Bytes, URL_Length)
-
 # Convertimos a data.table para usar la función recomendada
 df_dt <- as.data.table(df_select)
 df_one_hot <- one_hot(df_dt, sparsifyNAs = TRUE)
+```
 
-# 4. Normalización (Paso crítico para K-means)
+Escalamiento de Datos
+En los datos, Bytes llega hasta 564,310, mientras que URL_Length difícilmente pasa de 100.Si no escalamos, K-means pensará que Bytes es miles de veces más importante que todo lo demás solo porque el número es más grande.Usando scale convierte todos los valores a una escala común (media 0 y desviación estándar 1), para que todas las variables pesen lo mismo en el análisis.
+```{r dt}
 # Como Bytes tiene valores muy grandes comparado con URL_Length, 
 # escalamos los datos para que ninguna variable domine a la otra.
 df_scaled <- scale(df_one_hot)
+```
+
+```{r Kmeans}
+set.seed(123) # Para que los resultados sean reproducibles
+
+# Ejecución con k = 2
+km_2 <- kmeans(df_scaled, centers = 2, nstart = 20)
+
+# Ejecución con k = 3
+km_3 <- kmeans(df_scaled, centers = 3, nstart = 20)
+
+# Añadimos las etiquetas de los clústeres al dataframe original para el análisis
+df_ae3_de$cluster_k2 <- as.factor(km_2$cluster)
+df_ae3_de$cluster_k3 <- as.factor(km_3$cluster)
 ```
 
 ### 9.Representad visualmente en gráficos de tipo scatter plot el resultado de vuestros clústering y interpretad el resultado obtenido
