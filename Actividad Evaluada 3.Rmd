@@ -182,6 +182,82 @@ datatable(df_ae3_de)
 
 ### 4.Identificar el número único de usuarios que han interactuado directamente con el servidor de forma segregada según si los usuarios han tenido algún tipo de error en las distintas peticiones ofrecidas por el servidor.
 
+Para este análisis, clasificamos las interacciones en dos grupos: peticiones exitosas (códigos de estado 200, 302, 304) y peticiones con error (códigos 400 y 500). Se considera un "usuario único" a cada dirección IP distinta presente en los registros.
+
+El primer paso es definir qué es un "error" en el contexto de un servidor Apache. Por estándar, cualquier código de estado igual o mayor a 400 indica un problema (404 es "No encontrado", 403 es "Prohibido", etc.).
+
+```{r exploración}
+# Creamos una columna lógica para identificar errores (Códigos >= 400)
+# Convertimos el factor ResponseCode a numérico para la comparación
+df_ae3_de <- df_ae3_de %>%
+  mutate(Status_Error = as.numeric(as.character(ResponseCode)) >= 400)
+```
+
+mutate: Crea una nueva columna llamada Status_Error.
+
+as.numeric(as.character(...)): Como en tu limpieza previa definiste ResponseCode como un Factor, R no puede compararlo directamente con un número. Primero lo volvemos texto y luego número para poder preguntar si es "mayor o igual a 400".
+
+Resultado: Tendrás una columna con valores TRUE (hay error) o FALSE (todo bien).
+
+El enunciado pide usuarios que no hayan tenido ningún error en sus interacciones.
+
+```{r sin_error}
+# Identificar usuarios (IPs) que NO han tenido ningún error en sus peticiones
+usuarios_sin_error <- df_ae3_de %>%
+  group_by(IP) %>%
+  summarise(total_errores = sum(Status_Error)) %>%
+  filter(total_errores == 0) %>%
+  nrow()
+```
+
+group_by(IP): Agrupamos toda la actividad por cada usuario único (su dirección IP).
+
+sum(Status_Error): Dado que TRUE vale 1 y FALSE vale 0, al sumarlos obtenemos cuántos errores cometió ese usuario específico.
+
+filter(total_errores == 0): Solo nos quedamos con los usuarios cuyo contador de errores es cero.
+
+nrow(): Contamos cuántas filas (usuarios) quedaron.
+
+buscamos a los usuarios que sí tuvieron codigo de error y queremos saber que tipo de código de error recibieron.
+
+```{r con_error}
+# Identificar usuarios (IPs) que SÍ han experimentado algún error, 
+# desglosados por la tipología (código) del error.
+usuarios_con_error_detalle <- df_ae3_de %>%
+  filter(Status_Error == TRUE) %>%
+  group_by(ResponseCode) %>%
+  summarise(Usuarios_Unicos = n_distinct(IP))
+```
+
+filter(Status_Error == TRUE): Descartamos de inmediato todas las peticiones exitosas.
+
+group_by(ResponseCode): Agrupamos por el código de error (ej: todos los del 404 juntos).
+
+n_distinct(IP): Esta función es vital. Si la IP 141.243.1.172 intentó entrar a 5 páginas que no existen, n_distinct hará que solo cuente como 1 usuario único afectado por el error 404, evitando inflar los números.
+
+```{r con_error2}
+# Total de usuarios con al menos un error (independientemente del código)
+total_usuarios_con_error <- df_ae3_de %>%
+  filter(Status_Error == TRUE) %>%
+  summarise(Total = n_distinct(IP)) %>%
+  pull(Total)
+```
+
+Resultados del análisis:
+
+
+Usuarios sin errores: Se identificaron **`r usuarios_sin_error`** usuarios únicos cuyas peticiones fueron todas servidas correctamente (códigos < 400).
+
+
+Usuarios con errores: Un total de **`r total_usuarios_con_error`** usuarios únicos experimentaron al menos un fallo en sus solicitudes.
+
+A continuación, se detalla el número de usuarios afectados según el tipo de error específico encontrado en la muestra:
+
+```{r exploración_análisis}
+kable(usuarios_con_error_detalle, col.names = c("Código de Error", "N° Usuarios Únicos"), 
+      caption = "Desglose de usuarios únicos por tipología de error")
+```
+
 ## Análisis de Datos
 
 ### 5.Analizar los distintos tipos de peticiones HTTP (GET, POST, PUT, DELETE) gestionadas por el servidor, identificando la frecuencia de cada una de estas. Repetir el análisis, esta vez filtrando previamente aquellas peticiones correspondientes a recursos ofrecidos de tipo imagen.
@@ -189,6 +265,22 @@ datatable(df_ae3_de)
 ## Visualización de Resultados
 
 ### 6.Generar al menos 2 gráficos distintos que permitan visualizar alguna característica relevante de los datos analizados.
+
+
+```{r grafico_01}
+
+library(ggplot2)
+
+ggplot(usuarios_con_error_detalle, aes(x = as.factor(ResponseCode), y = Usuarios_Unicos)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(
+    title = "Usuarios únicos por tipo de error",
+    x = "Código de error",
+    y = "Número de usuarios únicos"
+  ) +
+  theme_minimal()
+
+```
 
 ### 7.Generar un gráfico que permita visualizar el número de peticiones servidas a lo largo del tiempo.
 
