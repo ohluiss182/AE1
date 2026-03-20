@@ -390,14 +390,14 @@ ggplot(df_ae3_methods, aes(x = Tipo, y = Frecuencia)) +
 
 Para realizar el agrupamiento, primero debemos transformar nuestro data frame elegante en una matriz puramente numérica. Seguimos las instrucciones de generar una métrica sobre el recurso servido (longitud de la URL) y expandir las variables categóricas.
 
-Creación de la métrica de URL El algoritmo K-means solo trabaja con números. Como no podemos meter la URL "/software.html" directamente, extraemos su longitud.Esto ayuda al modelo a diferenciar entre peticiones a la raíz / (cortas) de peticiones a recursos profundos o intentos de ataque con parámetros largos.
+Dado que el algoritmo K-means solo trabaja con números, no se puede usar la URL `"/software.html"` directamente, por lo que es necesario extraer su longitud. Esto ayuda al modelo a diferenciar entre peticiones a la raíz `/` (cortas) de peticiones a recursos profundos o intentos de ataque con parámetros largos.
 
 ```{r metrica_url}
 # Generar columna numérica de longitud de URL [cite: 66]
 df_ae3_de$URL_Length <- nchar(as.character(df_ae3_de$URL))
 ```
 
-NAs y Selección Si un recurso no devolvió bytes (como un error 404), le asignamos 0 para que el modelo pueda procesar la fila sin descartarla.
+Así mismo, si un recurso no devolvió bytes (como un error 404), le asignamos 0 para que el modelo pueda procesar la fila sin descartarla.
 
 ```{r NA}
 # Si el código es 404 o similar, asumimos 0 bytes servidos
@@ -405,7 +405,7 @@ df_ae3_clustering <- df_ae3_de %>%
   mutate(Bytes = ifelse(is.na(Bytes) | Bytes == 0, 0, Bytes))
 ```
 
-One-Hot Encoding (traductor) Esta función crea una columna nueva para cada categoría. Si la petición es "GET", pondrá un 1 en la columna Tipo_GET y un 0 en las demás. Así, el algoritmo puede medir la "distancia" entre un GET y un POST.
+Luego, creamos una función capaz de crear una columna nueva para cada categoría. Si la petición es "GET", pondrá un 1 en la columna Tipo_GET y un 0 en las demás. Así, el algoritmo puede medir la "distancia" entre un GET y un POST.
 
 ```{r peticiòn}
 # Solo usaremos Tipo, ResponseCode, Bytes y URL_Length
@@ -416,7 +416,7 @@ df_dt <- as.data.table(df_select)
 df_one_hot <- one_hot(df_dt, sparsifyNAs = TRUE)
 ```
 
-Escalamiento de Datos En los datos, Bytes llega hasta 564,310, mientras que URL_Length difícilmente pasa de 100.Si no escalamos, K-means pensará que Bytes es miles de veces más importante que todo lo demás solo porque el número es más grande.Usando scale convierte todos los valores a una escala común (media 0 y desviación estándar 1), para que todas las variables pesen lo mismo en el análisis.
+En los datos, dado que Bytes es un valor mucho más grande que los de URL_Lenght, si no escalamos, K-means pensará que Bytes es miles de veces más importante que todo lo demás solo porque el número es más grande. Usando `scale` convierte todos los valores a una escala común (media 0 y desviación estándar 1), para que todas las variables pesen lo mismo en el análisis.
 
 ```{r dt}
 # Como Bytes tiene valores muy grandes comparado con URL_Length, 
@@ -444,9 +444,9 @@ Utilizaremos gráficos de dispersión para comparar variables clave, como la Lon
 
 Análisis con K=2:
 
-Clúster 1 (Tráfico Estándar): Agrupa la gran mayoría de las peticiones (47,748 observaciones en total en el dataset) que tienen un tamaño de bytes bajo o moderado y URLs de longitud normal.
+-   **Clúster 1 (Tráfico Estándar):** Agrupa la gran mayoría de las peticiones (**`nrow(df_ae3_de)`** observaciones en total en el dataset) que tienen un tamaño de bytes bajo o moderado y URLs de longitud normal.
 
-Clúster 2 (Valores Atípicos/Anomalías): Identifica peticiones con un volumen de Bytes extremadamente alto (como el registro de 564,310 bytes visto en los datos) o URLs inusualmente largas. En ciberseguridad, este grupo es crítico para detectar posibles exfiltraciones de datos o escaneos de vulnerabilidades.
+-   **Clúster 2 (Valores Atípicos/Anomalías):** Identifica peticiones con un volumen de Bytes extremadamente alto o URLs inusualmente largas. En ciberseguridad, este grupo es crítico para detectar posibles exfiltraciones de datos o escaneos de vulnerabilidades.
 
 ```{r K2}
 # Gráfico para K=2
@@ -459,7 +459,9 @@ ggplot(df_ae3_de, aes(x = URL_Length, y = Bytes, color = cluster_k2)) +
        color = "Clúster")
 ```
 
-Análisis con K=3: Al añadir un tercer clúster, el algoritmo suele separar el "Tráfico Estándar" en dos subgrupos: uno para peticiones exitosas (200 OK) con bytes constantes y otro para peticiones de control o errores (404, 302) que devuelven 0 bytes. El tercer clúster permanece enfocado en los recursos pesados (imágenes grandes o descargas de software), permitiendo una segmentación más fina entre el uso operativo normal y el uso intensivo de ancho de banda.
+Análisis con K=3:
+
+Al añadir un tercer clúster, el algoritmo suele separar el "Tráfico Estándar" en dos subgrupos: uno para peticiones exitosas (200 OK) con bytes constantes y otro para peticiones de control o errores (404, 302) que devuelven 0 bytes. El tercer clúster permanece enfocado en los recursos pesados (imágenes grandes o descargas de software), permitiendo una segmentación más fina entre el uso operativo normal y el uso intensivo de ancho de banda.
 
 ```{r K3}
 # Gráfico para K=3
