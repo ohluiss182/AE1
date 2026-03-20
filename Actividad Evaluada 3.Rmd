@@ -98,6 +98,50 @@ datatable(df_ae3_de)
 
 ### 4.Identificar el número único de usuarios que han interactuado directamente con el servidor de forma segregada según si los usuarios han tenido algún tipo de error en las distintas peticiones ofrecidas por el servidor.
 
+Para este análisis, clasificamos las interacciones en dos grupos: peticiones exitosas (códigos de estado 200, 302, 304) y peticiones con error (códigos 400 y 500). Se considera un "usuario único" a cada dirección IP distinta presente en los registros.
+
+```{r exploración}
+# 1. Creamos una columna lógica para identificar errores (Códigos >= 400)
+# Convertimos el factor ResponseCode a numérico para la comparación
+df_ae3_de <- df_ae3_de %>%
+  mutate(Status_Error = as.numeric(as.character(ResponseCode)) >= 400)
+
+# 2. Identificar usuarios (IPs) que NO han tenido ningún error en sus peticiones
+usuarios_sin_error <- df_ae3_de %>%
+  group_by(IP) %>%
+  summarise(total_errores = sum(Status_Error)) %>%
+  filter(total_errores == 0) %>%
+  nrow()
+
+# 3. Identificar usuarios (IPs) que SÍ han experimentado algún error, 
+# desglosados por la tipología (código) del error.
+usuarios_con_error_detalle <- df_ae3_de %>%
+  filter(Status_Error == TRUE) %>%
+  group_by(ResponseCode) %>%
+  summarise(Usuarios_Unicos = n_distinct(IP))
+
+# 4. Total de usuarios con al menos un error (independientemente del código)
+total_usuarios_con_error <- df_ae3_de %>%
+  filter(Status_Error == TRUE) %>%
+  summarise(Total = n_distinct(IP)) %>%
+  pull(Total)
+```
+
+Resultados del análisis:
+
+
+Usuarios sin errores: Se identificaron **`r usuarios_sin_error`** usuarios únicos cuyas peticiones fueron todas servidas correctamente (códigos < 400).
+
+
+Usuarios con errores: Un total de **`r total_usuarios_con_error`** usuarios únicos experimentaron al menos un fallo en sus solicitudes.
+
+A continuación, se detalla el número de usuarios afectados según el tipo de error específico encontrado en la muestra:
+
+```{r exploración_análisis}
+kable(usuarios_con_error_detalle, col.names = c("Código de Error", "N° Usuarios Únicos"), 
+      caption = "Desglose de usuarios únicos por tipología de error")
+```
+
 ## Análisis de Datos
 
 ### 5.Analizar los distintos tipos de peticiones HTTP (GET, POST, PUT, DELETE) gestionadas por el servidor, identificando la frecuencia de cada una de estas. Repetir el análisis, esta vez filtrando previamente aquellas peticiones correspondientes a recursos ofrecidos de tipo imagen.
