@@ -1,5 +1,5 @@
 ---
-title: "Actividad Evaluable 2: Seminario Internacional en Herramientas y Técnicas de Detección de Ciberamenazas"
+title: "Actividad Evaluable 3: Seminario Internacional en Herramientas y Técnicas de Detección de Ciberamenazas"
 author: "Grupo CJLR"
 date: "20 de marzo de 2026"
 output: html_document
@@ -184,9 +184,11 @@ datatable(df_ae3_de)
 
 ### 4.Identificar el número único de usuarios que han interactuado directamente con el servidor de forma segregada según si los usuarios han tenido algún tipo de error en las distintas peticiones ofrecidas por el servidor.
 
-Para este análisis, clasificamos las interacciones en dos grupos: peticiones exitosas (códigos de estado 200, 302, 304) y peticiones con error (códigos 400 y 500). Se considera un "usuario único" a cada dirección IP distinta presente en los registros.
+Para este análisis, clasificamos las interacciones en dos grupos: peticiones exitosas (códigos de estado `200`, `302`, `304`) y peticiones con error (códigos `400` y `500`). Se considera un "usuario único" a cada dirección IP distinta presente en los registros.
 
-El primer paso es definir qué es un "error" en el contexto de un servidor Apache. Por estándar, cualquier código de estado igual o mayor a 400 indica un problema (404 es "No encontrado", 403 es "Prohibido", etc.).
+El primer paso es definir qué es un "error" en el contexto de un servidor. Por estándar, cualquier código de estado igual o mayor a `400` indica un problema (`404` es `"No encontrado"`, `403` es `"Prohibido"`, etc.).
+
+Una vez entendido esto, usaremos las siguientes funciones para crear una nueva columna que indique si el ResponseCode corresponde a un error o no:
 
 ```{r exploración}
 # Creamos una columna lógica para identificar errores (Códigos >= 400)
@@ -195,16 +197,18 @@ df_ae3_de <- df_ae3_de %>%
   mutate(Status_Error = as.numeric(as.character(ResponseCode)) >= 400)
 ```
 
-mutate: Crea una nueva columna llamada Status_Error.
+El bloque anterior se entiende de la siguiente manera:
 
-as.numeric(as.character(...)): Como en tu limpieza previa definiste ResponseCode como un Factor, R no puede compararlo directamente con un número. Primero lo volvemos texto y luego número para poder preguntar si es "mayor o igual a 400".
+-   **mutate:** Crea una nueva columna llamada Status_Error.
 
-Resultado: Tendrás una columna con valores TRUE (hay error) o FALSE (todo bien).
+-   **as.numeric(as.character(...))**: En el paso anterior, definimos `ResponseCode` como un `Factor`. En ese sentido, R no puede compararlo directamente con un número, por lo que primero lo volvemos texto y luego número para poder preguntar si es "mayor o igual a 400".
 
-El enunciado pide usuarios que no hayan tenido ningún error en sus interacciones.
+Como resultado, obtendremos una columna `Status_Error` con valores TRUE (hay error) o FALSE (todo bien).
+
+Dado que se pide los usuarios que no hayan tenido ningún error en sus interacciones, usamos el siguiente código:
 
 ```{r sin_error}
-# Identificar usuarios (IPs) que NO han tenido ningún error en sus peticiones
+# Identificar usuarios (IPs) que no han tenido ningún error en sus peticiones
 usuarios_sin_error <- df_ae3_de %>%
   group_by(IP) %>%
   summarise(total_errores = sum(Status_Error)) %>%
@@ -212,15 +216,19 @@ usuarios_sin_error <- df_ae3_de %>%
   nrow()
 ```
 
-group_by(IP): Agrupamos toda la actividad por cada usuario único (su dirección IP).
+El bloque anterior se entiende de la siguiente manera:
 
-sum(Status_Error): Dado que TRUE vale 1 y FALSE vale 0, al sumarlos obtenemos cuántos errores cometió ese usuario específico.
+-   **group_by(IP):** Agrupamos toda la actividad por cada usuario único (su dirección IP).
 
-filter(total_errores == 0): Solo nos quedamos con los usuarios cuyo contador de errores es cero.
+-   **sum(Status_Error):** Dado que TRUE vale 1 y FALSE vale 0, al sumarlos obtenemos cuántos errores cometió ese usuario específico.
 
-nrow(): Contamos cuántas filas (usuarios) quedaron.
+-   **filter(total_errores == 0):** Solo nos quedamos con los usuarios cuyo contador de errores es cero.
 
-buscamos a los usuarios que sí tuvieron codigo de error y queremos saber que tipo de código de error recibieron.
+-   **nrow():** Contamos cuántas filas (usuarios) quedaron.
+
+Cabe señalar que los usuarios anteriores muestran exclusivamente a los que no han tenido ningún error. Aquellos usuarios que hayan tenido peticiones con error y sin error son contabilizados como usuarios con error.
+
+Ahora debemos identificar a los usuarios que sí tuvieron codigo de error y qel tipo de código de error recibieron.
 
 ```{r con_error}
 # Identificar usuarios (IPs) que SÍ han experimentado algún error, 
@@ -231,11 +239,13 @@ usuarios_con_error_detalle <- df_ae3_de %>%
   summarise(Usuarios_Unicos = n_distinct(IP))
 ```
 
-filter(Status_Error == TRUE): Descartamos de inmediato todas las peticiones exitosas.
+El bloque anterior se entiende de la siguiente manera:
 
-group_by(ResponseCode): Agrupamos por el código de error (ej: todos los del 404 juntos).
+-   **filter(Status_Error == TRUE):** Descartamos de inmediato todas las peticiones exitosas.
 
-n_distinct(IP): Esta función es vital. Si la IP 141.243.1.172 intentó entrar a 5 páginas que no existen, n_distinct hará que solo cuente como 1 usuario único afectado por el error 404, evitando inflar los números.
+-   **group_by(ResponseCode):** Agrupamos por el código de error (ej: todos los del `404` juntos).
+
+-   **n_distinct(IP):** Esta función es vital. Si la IP `141.243.1.172` intentó entrar a 5 páginas que no existen, `n_distinct` hará que solo cuente como 1 usuario único afectado por el error `404`, evitando inflar los números.
 
 ```{r con_error2}
 # Total de usuarios con al menos un error (independientemente del código)
@@ -245,13 +255,11 @@ total_usuarios_con_error <- df_ae3_de %>%
   pull(Total)
 ```
 
-Resultados del análisis:
+De lo anterior, se obtiene que:
 
+-   **Usuarios sin errores:** Se identificaron **`r usuarios_sin_error`** usuarios únicos cuyas peticiones fueron todas servidas correctamente (códigos \< `400`).
 
-Usuarios sin errores: Se identificaron **`r usuarios_sin_error`** usuarios únicos cuyas peticiones fueron todas servidas correctamente (códigos < 400).
-
-
-Usuarios con errores: Un total de **`r total_usuarios_con_error`** usuarios únicos experimentaron al menos un fallo en sus solicitudes.
+-   **Usuarios con errores:** Un total de **`r total_usuarios_con_error`** usuarios únicos experimentaron al menos un fallo en sus solicitudes.
 
 A continuación, se detalla el número de usuarios afectados según el tipo de error específico encontrado en la muestra:
 
@@ -300,17 +308,17 @@ frecuencia_http_imagenes <- df_imagenes %>%
 
 En primer lugar, se obtiene la distribución de las peticiones HTTP más comunes registradas en el servidor. Esta análisis permite identificar qué método es el más utilizado durante la interacción con los recursos servidos.
 
-```{}
+```         
 kable(frecuencia_http,
       col.names = c("Método HTTP", "Frecuencia"),
       caption = "Frecuencia de peticiones HTTP en el total del dataset")
 ```
 
-A partir de los resultados obtenidos, se observa que el método predominante es r frecuencia_http$Tipo[which.max(frecuencia_http$Frecuencia)], con un total de r max(frecuencia_http$Frecuencia)peticiones. Este comportamiento resulta esperable en logs de servidor web, ya que el método GET suele utilizarse para recuperar páginas, documentos, imágenes y otros recursos solicitados por los clientes.
+A partir de los resultados obtenidos, se observa que el método predominante es r frecuencia_http$Tipo[which.max(frecuencia_http$Frecuencia)], con un total de r max(frecuencia_http\$Frecuencia)peticiones. Este comportamiento resulta esperable en logs de servidor web, ya que el método GET suele utilizarse para recuperar páginas, documentos, imágenes y otros recursos solicitados por los clientes.
 
 A continuación, se repite la análisis considerando únicamente las peticiones realizadas sobre recursos de tipo imagen. Para ello, se han filtrado las URLs cuya extensión corresponde a formatos gráficos habituales, como .jpg, .jpeg, .png, .gif, .bmp, , .webp, .svg, .tif, .tiffo .ico.
 
-```{}
+```         
 
 kable(frecuencia_http_imagenes, 
       col.names = c("Método HTTP", "Frecuencia"), 
@@ -318,11 +326,9 @@ kable(frecuencia_http_imagenes,
       
 ```
 
-En el subconjunto de imágenes, el método más frecuente es r frecuencia_http_imagenes$Tipo[which.max(frecuencia_http_imagenes$Frecuencia)], con r max(frecuencia_http_imagenes$Frecuencia)solicitudes. Esto sugiere que los recursos gráficos son accedidos principalmente mediante peticiones de lectura, lo cual es consistente con el funcionamiento habitual de un servidor web.
+En el subconjunto de imágenes, el método más frecuente es r frecuencia_http_imagenes$Tipo[which.max(frecuencia_http_imagenes$Frecuencia)], con r max(frecuencia_http_imagenes\$Frecuencia)solicitudes. Esto sugiere que los recursos gráficos son accedidos principalmente mediante peticiones de lectura, lo cual es consistente con el funcionamiento habitual de un servidor web.
 
 En conclusión, la análisis confirma que las peticiones de tipo GET concentran la mayor parte de la actividad tanto en el conjunto global de registros como en el subconjunto de recursos de imagen. Por el contrario, métodos como POST, PUT y DELETE presentan una frecuencia mucho menor o incluso nula, lo que indica que el servidor analizado se utiliza principalmente para servir contenido y no tanto para operaciones de modificación o eliminación de recursos.
-
-
 
 ### 6.Generar al menos 2 gráficos distintos que permitan visualizar alguna característica relevante de los datos analizados.
 
