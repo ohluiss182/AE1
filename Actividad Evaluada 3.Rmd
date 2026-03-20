@@ -35,7 +35,33 @@ df_ae3 <- read.table("epa-http.csv", header = FALSE, sep = " ", fill = TRUE, str
 colnames(df_ae3) <- c("IP", "Time", "Request", "ResponseCode", "Bytes")
 ```
 
-Luego de ello, buscamos separar la columna "Request" para poder realizar un mejor trabajo;
+El comando anterior hace que se creen un data frame de 5 columnas, y retirando las comillas. Las columnas son:
+
+-   **IP:** Representa la IP o DNS reverso (si está disponible) de quien hace la petición.
+
+-   **Time:** Tiempo en que se ejecuta la petición. Está en formato [dd:HH:MM:SS], donde:
+
+    -   **dd:** Día del mes cuando ocurre el evento.
+
+    -   **HH:** Hora del día cuando ocurre el evento.
+
+    -   **MM:** Minuto de la hora cuando ocurre el evento.
+
+    -   **SS:** Segundo del minuto cuando ocurre el evento.
+
+-   **Request:** Petición realizada al servidor, compuesto del Método, URI y Protocolo.
+
+-   **ResponseCode:** Código de respuesta que entrega el servidor relacionada a la petición realizada.
+
+-   **Bytes:** Cantidad de bytes que se han transferido en la petición.
+
+Luego de ello, buscamos separar la columna **"Request"** para poder realizar un mejor trabajo, generando 3 nuevas columnas:
+
+-   **Tipo:** Método HTTP de la petición.
+
+-   **URL:** URI de la petición.
+
+-   **Protocolo:** Protocolo de la petición.
 
 ```{r separacion_request}
 df_ae3_split <- df_ae3 %>%
@@ -49,17 +75,73 @@ Finalmente, mostramos el datatable obtenido:
 datatable(df_ae3_split)
 ```
 
+A modo de validación, se obtienen las dimensiones:
+
+```{r dimensiones}
+dim(df_ae3_split)
+```
+
+En ese sentido, las dimensiones de la tabla son **`r ncol(df_ae3_split)`** columnas y **`r nrow(df_ae3_split)`** filas.
+
 ### 2.Incluid en el documento un apartado con la descripción de los datos analizados: fuente, tipología, descripción de la información contenida (los diferentes campos) y sus valores.
+
+Para poder ayudar con la visualización, se utiliza la función `summary`.
 
 ```{r summary}
 summary(df_ae3_split)
 ```
 
+El resultado anterior nos muestra que:
+
+-   **Columna `IP`**
+
+```{r summary_ip}
+summary(df_ae3_split$IP)
+```
+
+-   **Columna `Time`**
+
+```{r summary_time}
+summary(df_ae3_split$Time)
+```
+
+-   **Columna `Tipo`**
+
+```{r summary_tipo}
+summary(df_ae3_split$Tipo)
+```
+
+-   **Columna `URL`**
+
+```{r summary_url}
+summary(df_ae3_split$URL)
+```
+
+-   **Columna `Protocolo`**
+
+```{r summary_protocol}
+summary(df_ae3_split$Protocolo)
+```
+
+-   **Columna `ResponseCode`**
+
+```{r summary_ResponseCode}
+summary(df_ae3_split$ResponseCode)
+```
+
+-   **Columna `Bytes`**
+
+```{r summary_Bytes}
+summary(df_ae3_split$Bytes)
+```
+
+De lo anterior, se verifica que casi todas las columnas está en formato texto, lo que no necesariamente es lo mejor para trabajarlos.
+
 ## Limpieza de los Datos
 
 ### 3.Aprovechando que los datos a analizar son los mismos de la primera práctica, para esta entrega es imprescindible que los datos estén en formato de “datos elegantes”.
 
-Para comenzar con la limpieza de datos, necesitamos homogeneizar los valores de la columna "Bytes", haciendo que los NA y los - pases a ser 0.
+Para comenzar con la limpieza de datos, necesitamos homogeneizar los valores de la columna `Bytes`, haciendo que los `NA` y los `-` pasen a ser `0`. Así mismo, creamos el data frame `df_ae3_de` para comenzar con la limpieza.
 
 ```{r limpieza1, echo=TRUE, message=FALSE, warning=FALSE}
 # Creamos nueva veriable para el dataframe
@@ -70,7 +152,7 @@ df_ae3_de$Bytes <- as.numeric(ifelse(df_ae3_de$Bytes == "-", NA, df_ae3_de$Bytes
 df_ae3_de$Bytes[is.na(df_ae3_de$Bytes)] <- 0
 ```
 
-Acto seguido, se procede con el cambio de variables de las columnas "Tipo", "Protocolo" y "ResponseCode", cambiandolos a factores al ser poder tener un número finito de valores:
+Acto seguido, se procede con el cambio de variables de las columnas `Tipo`, `Protocolo` y `ResponseCode`, cambiandolos a factores al ser poder tener un número finito de valores:
 
 ```{r limpieza2, echo=TRUE, include=T}
 # Cambio de variables
@@ -79,18 +161,20 @@ df_ae3_de$Tipo <- as.factor(df_ae3_de$Tipo)
 df_ae3_de$Protocolo <- as.factor(df_ae3_de$Protocolo)
 ```
 
-Finalmente, vamos a normalizar la columna "Time", asignando fecha y año actuales sólo para fines educativos.
+Finalmente, vamos a normalizar la columna `Time`, asignando fecha y año actuales sólo para fines educativos.
 
 ```{r limpieza3, echo=TRUE, include=T}
 # Cambio de columna Time
 df_ae3_de$Time <- strptime(df_ae3_de$Time,"[%d:%H:%M:%S]")
 ```
 
-Se muestra el nuevo data frame, junto con el summary:
+Se muestra el nuevo data frame, junto con el `summary`:
 
 ```{r summary_ds}
 summary(df_ae3_de)
 ```
+
+De lo anterior, verificamos que ahora ya se está presentando la información en un formato que nos permita trabajar. Presentamos a continuación la tabla.
 
 ```{r data_table_ds, echo=TRUE, message=FALSE, warning=FALSE}
 datatable(df_ae3_de)
@@ -180,7 +264,65 @@ kable(usuarios_con_error_detalle, col.names = c("Código de Error", "N° Usuario
 
 ### 5.Analizar los distintos tipos de peticiones HTTP (GET, POST, PUT, DELETE) gestionadas por el servidor, identificando la frecuencia de cada una de estas. Repetir el análisis, esta vez filtrando previamente aquellas peticiones correspondientes a recursos ofrecidos de tipo imagen.
 
-## Visualización de Resultados
+Para este apartado , se anaizaraán los métodos HHTP más relevantes solicitados en el enunciado: GET, POST, PUT y DELETE. Primero, se calculará la frecuencia de cada tipo de petición sobre el total de registros del servidor. después se repartirá el mismo analisis filtrando únicamente aquellas solicitudes cuya URL apunte a recursos de tipo imagen, identificados a partir de su extensión.
+
+```{r analisis_peticiones_htpp, echo=TRUE, message=FALSE, warning=FALSE}
+# Vector con los métodos HTTP a analizar
+metodos_http <- c("GET", "POST", "PUT", "DELETE")
+
+# 1. Frecuencia de peticiones HTTP en todo el dataset
+frecuencia_http <- df_ae3_de %>%
+  filter(as.character(Tipo) %in% metodos_http) %>%
+  mutate(Tipo = factor(as.character(Tipo), levels = metodos_http)) %>%
+  count(Tipo, name = "Frecuencia") %>%
+  tidyr::complete(Tipo = factor(metodos_http, levels = metodos_http), fill = list(Frecuencia = 0)) %>%
+  arrange(Tipo)
+
+# 2. Filtrado de recursos de imagen según la extensión de la URL
+# Se consideran extensiones habituales de imágenes
+df_imagenes <- df_ae3_de %>%
+  filter(
+    str_detect(
+      URL,
+      regex("\\.(jpg|jpeg|png|gif|bmp|webp|svg|tif|tiff|ico)(\\?.*)?$", ignore_case = TRUE)
+    )
+  )
+
+# 3. Frecuencia de peticiones HTTP solo para recursos de imagen
+frecuencia_http_imagenes <- df_imagenes %>%
+  filter(as.character(Tipo) %in% metodos_http) %>%
+  mutate(Tipo = factor(as.character(Tipo), levels = metodos_http)) %>%
+  count(Tipo, name = "Frecuencia") %>%
+  tidyr::complete(Tipo = factor(metodos_http, levels = metodos_http), fill = list(Frecuencia = 0)) %>%
+  arrange(Tipo)
+
+```
+
+En primer lugar, se obtiene la distribución de las peticiones HTTP más comunes registradas en el servidor. Esta análisis permite identificar qué método es el más utilizado durante la interacción con los recursos servidos.
+
+```{}
+kable(frecuencia_http,
+      col.names = c("Método HTTP", "Frecuencia"),
+      caption = "Frecuencia de peticiones HTTP en el total del dataset")
+```
+
+A partir de los resultados obtenidos, se observa que el método predominante es r frecuencia_http$Tipo[which.max(frecuencia_http$Frecuencia)], con un total de r max(frecuencia_http$Frecuencia)peticiones. Este comportamiento resulta esperable en logs de servidor web, ya que el método GET suele utilizarse para recuperar páginas, documentos, imágenes y otros recursos solicitados por los clientes.
+
+A continuación, se repite la análisis considerando únicamente las peticiones realizadas sobre recursos de tipo imagen. Para ello, se han filtrado las URLs cuya extensión corresponde a formatos gráficos habituales, como .jpg, .jpeg, .png, .gif, .bmp, , .webp, .svg, .tif, .tiffo .ico.
+
+```{}
+
+kable(frecuencia_http_imagenes, 
+      col.names = c("Método HTTP", "Frecuencia"), 
+      caption = "Frecuencia de peticiones HTTP sobre recursos de tipo imagen")
+      
+```
+
+En el subconjunto de imágenes, el método más frecuente es r frecuencia_http_imagenes$Tipo[which.max(frecuencia_http_imagenes$Frecuencia)], con r max(frecuencia_http_imagenes$Frecuencia)solicitudes. Esto sugiere que los recursos gráficos son accedidos principalmente mediante peticiones de lectura, lo cual es consistente con el funcionamiento habitual de un servidor web.
+
+En conclusión, la análisis confirma que las peticiones de tipo GET concentran la mayor parte de la actividad tanto en el conjunto global de registros como en el subconjunto de recursos de imagen. Por el contrario, métodos como POST, PUT y DELETE presentan una frecuencia mucho menor o incluso nula, lo que indica que el servidor analizado se utiliza principalmente para servir contenido y no tanto para operaciones de modificación o eliminación de recursos.
+
+
 
 ### 6.Generar al menos 2 gráficos distintos que permitan visualizar alguna característica relevante de los datos analizados.
 
@@ -237,3 +379,4 @@ df_scaled <- scale(df_one_hot)
 ```
 
 ### 9.Representad visualmente en gráficos de tipo scatter plot el resultado de vuestros clústering y interpretad el resultado obtenido
+
