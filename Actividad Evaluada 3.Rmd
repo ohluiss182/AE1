@@ -305,36 +305,30 @@ df_ae3_methods_imagenes <- df_imagenes %>%
 
 En primer lugar, se obtiene la distribución de las peticiones HTTP registradas en el servidor. Este análisis permite identificar qué método es el más utilizado durante la interacción con los recursos servidos.
 
-```{r analisis_peticiones_htpp2, echo=TRUE, message=FALSE, warning=FALSE}         
+```{r analisis_peticiones_htpp2, echo=TRUE, message=FALSE, warning=FALSE}
 kable(df_ae3_methods,
       col.names = c("Método HTTP", "Frecuencia"),
       caption = "Frecuencia de peticiones HTTP en el total del dataset")
 ```
 
-
-A partir de los resultados obtenidos, se observa que el método predominante es r frecuencia_http$Tipo[which.max(frecuencia_http$Frecuencia)], con un total de r max(frecuencia_http\$Frecuencia)peticiones. Este comportamiento resulta esperable en logs de servidor web, ya que el método GET suele utilizarse para recuperar páginas, documentos, imágenes y otros recursos solicitados por los clientes.
-
+A partir de los resultados obtenidos, se observa que el método predominante es **`r df_ae3_methods$Tipo[which.max(df_ae3_methods$Frecuencia)]`**, con un total de **`r max(df_ae3_methods$Frecuencia)`** peticiones. Este comportamiento resulta esperable en logs de servidor web, ya que el método GET suele utilizarse para recuperar páginas, documentos, imágenes y otros recursos solicitados por los clientes.
 
 A continuación, se repite el análisis considerando únicamente las peticiones realizadas sobre recursos de tipo imagen. Para ello, se han filtrado las URLs cuya extensión corresponde a formatos gráficos habituales, como .jpg, .jpeg, .png, .gif, .bmp, .webp, .svg, .tif, .tiff o .ico.
 
-```{r analisis_peticiones_htpp3, echo=TRUE, message=FALSE, warning=FALSE}         
+```{r analisis_peticiones_htpp3, echo=TRUE, message=FALSE, warning=FALSE}
 kable(df_ae3_methods_imagenes,
       col.names = c("Método HTTP", "Frecuencia"),
       caption = "Frecuencia de peticiones HTTP sobre recursos de tipo imagen")
       
 ```
 
-En el subconjunto de imágenes, el método más frecuente es r frecuencia_http_imagenes$Tipo[which.max(frecuencia_http_imagenes$Frecuencia)], con r max(frecuencia_http_imagenes\$Frecuencia)solicitudes. Esto sugiere que los recursos gráficos son accedidos principalmente mediante peticiones de lectura, lo cual es consistente con el funcionamiento habitual de un servidor web.
+En el subconjunto de imágenes, el método más frecuente es **`r df_ae3_methods_imagenes$Tipo[which.max(df_ae3_methods_imagenes$Frecuencia)]`**, con **`r max(df_ae3_methods_imagenes$Frecuencia)`** solicitudes. Esto sugiere que los recursos gráficos son accedidos principalmente mediante peticiones de lectura, lo cual es consistente con el funcionamiento habitual de un servidor web.
 
-En conclusión, la análisis confirma que las peticiones de tipo GET concentran la mayor parte de la actividad tanto en el conjunto global de registros como en el subconjunto de recursos de imagen. Por el contrario, métodos como POST, PUT y DELETE presentan una frecuencia mucho menor o incluso nula, lo que indica que el servidor analizado se utiliza principalmente para servir contenido y no tanto para operaciones de modificación o eliminación de recursos.
-
-
+En conclusión, la análisis confirma que las peticiones de tipo GET concentran la mayor parte de la actividad tanto en el conjunto global de registros como en el subconjunto de recursos de imagen. Por el contrario, los otros métodos presentan una frecuencia mucho menor o incluso nula, lo que indica que el servidor analizado se utiliza principalmente para servir contenido y no tanto para operaciones de modificación o eliminación de recursos.
 
 ### 6.Generar al menos 2 gráficos distintos que permitan visualizar alguna característica relevante de los datos analizados.
 
-
-Gráfico 1: Usuarios únicos por tipo de error
-Este gráfico de barras nos muestra la cantidad de usuarios únicos afectados según cada tipo de error HTTP (códigos 4xx y 5xx). Ademas, nos permite identificar qué errores tienen mayor impacto en los usuarios, facilitando la detección de posibles problemas en el servidor o en la gestión de solicitudes.
+Gráfico 1: Usuarios únicos por tipo de error Este gráfico de barras nos muestra la cantidad de usuarios únicos afectados según cada tipo de error HTTP (códigos 4xx y 5xx). Ademas, nos permite identificar qué errores tienen mayor impacto en los usuarios, facilitando la detección de posibles problemas en el servidor o en la gestión de solicitudes.
 
 ```{r grafico_01}
 
@@ -352,8 +346,7 @@ ggplot(usuarios_con_error_detalle, aes(x = as.factor(ResponseCode), y = Usuarios
 
 ```
 
-Gráfico 2: Frecuencia de peticiones HTTP en todo el dataset
-Este gráfico de barras nos muestra la frecuencia de los métodos HTTP GET, POST, PUT y DELETE en el conjunto total de registros del servidor. Su objetivo es identificar qué tipo de petición es el más utilizado durante la interacción general con los recursos ofrecidos.
+Gráfico 2: Frecuencia de peticiones HTTP en todo el dataset Este gráfico de barras nos muestra la frecuencia de los métodos HTTP GET, POST, PUT y DELETE en el conjunto total de registros del servidor. Su objetivo es identificar qué tipo de petición es el más utilizado durante la interacción general con los recursos ofrecidos.
 
 ```{r grafico_02}
 
@@ -369,12 +362,11 @@ ggplot(df_ae3_methods, aes(x = Tipo, y = Frecuencia)) +
   ) +
   theme_minimal()
 
-``` 
+```
 
 ### 7.Generar un gráfico que permita visualizar el número de peticiones servidas a lo largo del tiempo.
 
-Gráfico 1: Frecuencia de peticiones HTTP en el total
-Este gráfico de barras nos presenta la frecuencia de los principales métodos HTTP (GET, POST, PUT, DELETE) en el conjunto total de datos. Tambien, nos permite observar qué tipo de petición es más utilizada por los usuarios, destacando el predominio de las solicitudes orientadas a la consulta de recursos.
+Gráfico 1: Frecuencia de peticiones HTTP en el total Este gráfico de barras nos presenta la frecuencia de los principales métodos HTTP (GET, POST, PUT, DELETE) en el conjunto total de datos. Tambien, nos permite observar qué tipo de petición es más utilizada por los usuarios, destacando el predominio de las solicitudes orientadas a la consulta de recursos.
 
 ```{r grafico_03}
 
@@ -398,16 +390,14 @@ ggplot(df_ae3_methods, aes(x = Tipo, y = Frecuencia)) +
 
 Para realizar el agrupamiento, primero debemos transformar nuestro data frame elegante en una matriz puramente numérica. Seguimos las instrucciones de generar una métrica sobre el recurso servido (longitud de la URL) y expandir las variables categóricas.
 
-Creación de la métrica de URL
-El algoritmo K-means solo trabaja con números. Como no podemos meter la URL "/software.html" directamente, extraemos su longitud.Esto ayuda al modelo a diferenciar entre peticiones a la raíz / (cortas) de peticiones a recursos profundos o intentos de ataque con parámetros largos.
+Creación de la métrica de URL El algoritmo K-means solo trabaja con números. Como no podemos meter la URL "/software.html" directamente, extraemos su longitud.Esto ayuda al modelo a diferenciar entre peticiones a la raíz / (cortas) de peticiones a recursos profundos o intentos de ataque con parámetros largos.
 
 ```{r metrica_url}
 # Generar columna numérica de longitud de URL [cite: 66]
 df_ae3_de$URL_Length <- nchar(as.character(df_ae3_de$URL))
 ```
 
-NAs y Selección
-Si un recurso no devolvió bytes (como un error 404), le asignamos 0 para que el modelo pueda procesar la fila sin descartarla.
+NAs y Selección Si un recurso no devolvió bytes (como un error 404), le asignamos 0 para que el modelo pueda procesar la fila sin descartarla.
 
 ```{r NA}
 # Si el código es 404 o similar, asumimos 0 bytes servidos
@@ -415,8 +405,7 @@ df_ae3_clustering <- df_ae3_de %>%
   mutate(Bytes = ifelse(is.na(Bytes) | Bytes == 0, 0, Bytes))
 ```
 
-One-Hot Encoding (traductor)
-Esta función crea una columna nueva para cada categoría. Si la petición es "GET", pondrá un 1 en la columna Tipo_GET y un 0 en las demás. Así, el algoritmo puede medir la "distancia" entre un GET y un POST.
+One-Hot Encoding (traductor) Esta función crea una columna nueva para cada categoría. Si la petición es "GET", pondrá un 1 en la columna Tipo_GET y un 0 en las demás. Así, el algoritmo puede medir la "distancia" entre un GET y un POST.
 
 ```{r peticiòn}
 # Solo usaremos Tipo, ResponseCode, Bytes y URL_Length
@@ -427,8 +416,8 @@ df_dt <- as.data.table(df_select)
 df_one_hot <- one_hot(df_dt, sparsifyNAs = TRUE)
 ```
 
-Escalamiento de Datos
-En los datos, Bytes llega hasta 564,310, mientras que URL_Length difícilmente pasa de 100.Si no escalamos, K-means pensará que Bytes es miles de veces más importante que todo lo demás solo porque el número es más grande.Usando scale convierte todos los valores a una escala común (media 0 y desviación estándar 1), para que todas las variables pesen lo mismo en el análisis.
+Escalamiento de Datos En los datos, Bytes llega hasta 564,310, mientras que URL_Length difícilmente pasa de 100.Si no escalamos, K-means pensará que Bytes es miles de veces más importante que todo lo demás solo porque el número es más grande.Usando scale convierte todos los valores a una escala común (media 0 y desviación estándar 1), para que todas las variables pesen lo mismo en el análisis.
+
 ```{r dt}
 # Como Bytes tiene valores muy grandes comparado con URL_Length, 
 # escalamos los datos para que ninguna variable domine a la otra.
@@ -470,9 +459,7 @@ ggplot(df_ae3_de, aes(x = URL_Length, y = Bytes, color = cluster_k2)) +
        color = "Clúster")
 ```
 
-Análisis con K=3:
-Al añadir un tercer clúster, el algoritmo suele separar el "Tráfico Estándar" en dos subgrupos: uno para peticiones exitosas (200 OK) con bytes constantes y otro para peticiones de control o errores (404, 302) que devuelven 0 bytes.
-El tercer clúster permanece enfocado en los recursos pesados (imágenes grandes o descargas de software), permitiendo una segmentación más fina entre el uso operativo normal y el uso intensivo de ancho de banda.
+Análisis con K=3: Al añadir un tercer clúster, el algoritmo suele separar el "Tráfico Estándar" en dos subgrupos: uno para peticiones exitosas (200 OK) con bytes constantes y otro para peticiones de control o errores (404, 302) que devuelven 0 bytes. El tercer clúster permanece enfocado en los recursos pesados (imágenes grandes o descargas de software), permitiendo una segmentación más fina entre el uso operativo normal y el uso intensivo de ancho de banda.
 
 ```{r K3}
 # Gráfico para K=3
