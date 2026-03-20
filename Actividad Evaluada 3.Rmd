@@ -327,7 +327,11 @@ En conclusión, la análisis confirma que las peticiones de tipo GET concentran 
 ### 6.Generar al menos 2 gráficos distintos que permitan visualizar alguna característica relevante de los datos analizados.
 
 
+Gráfico 1: Usuarios únicos por tipo de error
+Este gráfico de barras nos muestra la cantidad de usuarios únicos afectados según cada tipo de error HTTP (códigos 4xx y 5xx). Ademas, nos permite identificar qué errores tienen mayor impacto en los usuarios, facilitando la detección de posibles problemas en el servidor o en la gestión de solicitudes.
+
 ```{r grafico_01}
+
 
 library(ggplot2)
 
@@ -337,6 +341,25 @@ ggplot(usuarios_con_error_detalle, aes(x = as.factor(ResponseCode), y = Usuarios
     title = "Usuarios únicos por tipo de error",
     x = "Código de error",
     y = "Número de usuarios únicos"
+  ) +
+  theme_minimal()
+
+```
+
+Gráfico 2: Frecuencia de peticiones HTTP en el total
+Este gráfico de barras nos presenta la frecuencia de los principales métodos HTTP (GET, POST, PUT, DELETE) en el conjunto total de datos. Tambien, nos permite observar qué tipo de petición es más utilizada por los usuarios, destacando el predominio de las solicitudes orientadas a la consulta de recursos.
+
+```{r grafico_02}
+
+
+library(ggplot2)
+
+ggplot(frecuencia_http, aes(x = Tipo, y = Frecuencia)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(
+    title = "Frecuencia de Peticiones HTTP en el Total",
+    x = "Método HTTP",
+    y = "Frecuencia"
   ) +
   theme_minimal()
 
