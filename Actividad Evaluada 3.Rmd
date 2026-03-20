@@ -332,13 +332,10 @@ En conclusión, la análisis confirma que las peticiones de tipo GET concentran 
 
 ### 6.Generar al menos 2 gráficos distintos que permitan visualizar alguna característica relevante de los datos analizados.
 
-<<<<<<< HEAD
-=======
 
 Gráfico 1: Usuarios únicos por tipo de error
 Este gráfico de barras nos muestra la cantidad de usuarios únicos afectados según cada tipo de error HTTP (códigos 4xx y 5xx). Ademas, nos permite identificar qué errores tienen mayor impacto en los usuarios, facilitando la detección de posibles problemas en el servidor o en la gestión de solicitudes.
 
->>>>>>> 1af95800c35b443fe472909dcbde8422116c9545
 ```{r grafico_01}
 
 
