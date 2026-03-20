@@ -426,3 +426,36 @@ df_ae3_de$cluster_k3 <- as.factor(km_3$cluster)
 
 ### 9.Representad visualmente en gráficos de tipo scatter plot el resultado de vuestros clústering y interpretad el resultado obtenido
 
+Utilizaremos gráficos de dispersión para comparar variables clave, como la Longitud de la URL frente a los Bytes servidos, coloreando los puntos según el clúster asignado por el algoritmo.
+
+Análisis con K=2:
+
+Clúster 1 (Tráfico Estándar): Agrupa la gran mayoría de las peticiones (47,748 observaciones en total en el dataset) que tienen un tamaño de bytes bajo o moderado y URLs de longitud normal.
+
+Clúster 2 (Valores Atípicos/Anomalías): Identifica peticiones con un volumen de Bytes extremadamente alto (como el registro de 564,310 bytes visto en los datos) o URLs inusualmente largas. En ciberseguridad, este grupo es crítico para detectar posibles exfiltraciones de datos o escaneos de vulnerabilidades.
+
+```{r K2}
+# Gráfico para K=2
+ggplot(df_ae3_de, aes(x = URL_Length, y = Bytes, color = cluster_k2)) +
+  geom_point(alpha = 0.4) +
+  theme_minimal() +
+  labs(title = "Clústering K-means (k=2)",
+       x = "Longitud de la URL (caracteres)",
+       y = "Bytes Servidos",
+       color = "Clúster")
+```
+
+Análisis con K=3:
+Al añadir un tercer clúster, el algoritmo suele separar el "Tráfico Estándar" en dos subgrupos: uno para peticiones exitosas (200 OK) con bytes constantes y otro para peticiones de control o errores (404, 302) que devuelven 0 bytes.
+El tercer clúster permanece enfocado en los recursos pesados (imágenes grandes o descargas de software), permitiendo una segmentación más fina entre el uso operativo normal y el uso intensivo de ancho de banda.
+
+```{r K3}
+# Gráfico para K=3
+ggplot(df_ae3_de, aes(x = URL_Length, y = Bytes, color = cluster_k3)) +
+  geom_point(alpha = 0.4) +
+  theme_minimal() +
+  labs(title = "Clústering K-means (k=3)",
+       x = "Longitud de la URL (caracteres)",
+       y = "Bytes Servidos",
+       color = "Clúster")
+```
