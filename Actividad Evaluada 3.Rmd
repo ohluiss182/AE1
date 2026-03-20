@@ -356,10 +356,31 @@ ggplot(usuarios_con_error_detalle, aes(x = as.factor(ResponseCode), y = Usuarios
 
 ```
 
-Gráfico 2: Frecuencia de peticiones HTTP en el total
-Este gráfico de barras nos presenta la frecuencia de los principales métodos HTTP (GET, POST, PUT, DELETE) en el conjunto total de datos. Tambien, nos permite observar qué tipo de petición es más utilizada por los usuarios, destacando el predominio de las solicitudes orientadas a la consulta de recursos.
+Gráfico 2: Frecuencia de peticiones HTTP en todo el dataset
+Este gráfico de barras nos muestra la frecuencia de los métodos HTTP GET, POST, PUT y DELETE en el conjunto total de registros del servidor. Su objetivo es identificar qué tipo de petición es el más utilizado durante la interacción general con los recursos ofrecidos.
 
 ```{r grafico_02}
+
+library(ggplot2)
+
+ggplot(frecuencia_http, aes(x = Tipo, y = Frecuencia)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  geom_text(aes(label = Frecuencia), vjust = -0.3) +
+  labs(
+    title = "Frecuencia de peticiones HTTP en el total del dataset",
+    x = "Método HTTP",
+    y = "Frecuencia"
+  ) +
+  theme_minimal()
+
+``` 
+
+### 7.Generar un gráfico que permita visualizar el número de peticiones servidas a lo largo del tiempo.
+
+Gráfico 1: Frecuencia de peticiones HTTP en el total
+Este gráfico de barras nos presenta la frecuencia de los principales métodos HTTP (GET, POST, PUT, DELETE) en el conjunto total de datos. Tambien, nos permite observar qué tipo de petición es más utilizada por los usuarios, destacando el predominio de las solicitudes orientadas a la consulta de recursos.
+
+```{r grafico_03}
 
 
 library(ggplot2)
@@ -374,8 +395,6 @@ ggplot(frecuencia_http, aes(x = Tipo, y = Frecuencia)) +
   theme_minimal()
 
 ```
-
-### 7.Generar un gráfico que permita visualizar el número de peticiones servidas a lo largo del tiempo.
 
 ## Clústering de datos
 
