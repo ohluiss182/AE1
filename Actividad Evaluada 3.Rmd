@@ -11,7 +11,12 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
 
 ```{r librerias, include=FALSE}
-
+library(readr)
+library(tidyverse)
+library(stringr)
+library(knitr)
+library(dplyr)
+library(DT)
 ```
 
 # Análisis de logs de servidor usando R (parte II)
@@ -20,15 +25,74 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
 ### 1.Descomprimir el fichero comprimido que contiene los registros del servidor, y a partir de los datos extraídos, cargar en data frame los registros con las peticiones servidas.
 
+Para poder realizar una línea base desde la cual comenzar con la actividad, se genera el import mediante la función `read.table()` . Así mismo, se cambian los nombres de las columnas para poder identificarlas mejor.
+
+```{r carga, echo=TRUE, message=FALSE, warning=FALSE}
+# Carga y limpieza inicial
+df_ae3 <- read.table("epa-http.csv", header = FALSE, sep = " ", fill = TRUE, stringsAsFactors = FALSE)
+colnames(df_ae3) <- c("IP", "Time", "Request", "ResponseCode", "Bytes")
+```
+
+Luego de ello, buscamos separar la columna "Request" para poder realizar un mejor trabajo;
+
+```{r separacion_request}
+df_ae3_split <- df_ae3 %>%
+  mutate(Request = str_replace_all(Request, '"', "")) %>%
+  separate(Request, into = c("Tipo", "URL", "Protocolo"), sep = " ", extra = "merge", fill = "right")
+```
+
+Finalmente, mostramos el datatable obtenido:
+
+```{r data_table, echo=TRUE, message=FALSE, warning=FALSE}
+datatable(df_ae3_split)
+```
+
 ### 2.Incluid en el documento un apartado con la descripción de los datos analizados: fuente, tipología, descripción de la información contenida (los diferentes campos) y sus valores.
 
-```{r summary, include=FALSE}
-summary(df_2)
+```{r summary}
+summary(df_ae3_split)
 ```
 
 ## Limpieza de los Datos
 
 ### 3.Aprovechando que los datos a analizar son los mismos de la primera práctica, para esta entrega es imprescindible que los datos estén en formato de “datos elegantes”.
+
+Para comenzar con la limpieza de datos, necesitamos homogeneizar los valores de la columna "Bytes", haciendo que los NA y los - pases a ser 0.
+
+```{r limpieza1, echo=TRUE, message=FALSE, warning=FALSE}
+# Creamos nueva veriable para el dataframe
+df_ae3_de <- df_ae3_split
+
+# Convertir "-" a NA y la columna a numérica para que el cálculo funcione
+df_ae3_de$Bytes <- as.numeric(ifelse(df_ae3_de$Bytes == "-", NA, df_ae3_de$Bytes))
+df_ae3_de$Bytes[is.na(df_ae3_de$Bytes)] <- 0
+```
+
+Acto seguido, se procede con el cambio de variables de las columnas "Tipo", "Protocolo" y "ResponseCode", cambiandolos a factores al ser poder tener un número finito de valores:
+
+```{r limpieza2, echo=TRUE, include=T}
+# Cambio de variables
+df_ae3_de$ResponseCode <-  as.factor(df_ae3_de$ResponseCode)
+df_ae3_de$Tipo <- as.factor(df_ae3_de$Tipo)
+df_ae3_de$Protocolo <- as.factor(df_ae3_de$Protocolo)
+```
+
+Finalmente, vamos a normalizar la columna "Time", asignando fecha y año actuales sólo para fines educativos.
+
+```{r limpieza3, echo=TRUE, include=T}
+# Cambio de columna Time
+df_ae3_de$Time <- strptime(df_ae3_de$Time,"[%d:%H:%M:%S]")
+```
+
+Se muestra el nuevo data frame, junto con el summary:
+
+```{r summary_ds}
+summary(df_ae3_de)
+```
+
+```{r data_table_ds, echo=TRUE, message=FALSE, warning=FALSE}
+datatable(df_ae3_de)
+```
 
 ## Exploración de Datos
 
